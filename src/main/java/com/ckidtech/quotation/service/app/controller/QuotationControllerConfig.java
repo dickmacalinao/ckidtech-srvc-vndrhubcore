@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ckidtech.quotation.service.app.service.ReferenceDataService;
 import com.ckidtech.quotation.service.core.model.ReferenceData;
-import com.ckidtech.quotation.service.core.security.UserRole;
 
 @ComponentScan({"com.ckidtech.quotation.service.core.service"})
 @RestController
@@ -29,6 +28,8 @@ public class QuotationControllerConfig {
 	private ReferenceDataService referenceDataService;
 	
 	
+	// Service open to all 
+	
 	@RequestMapping(value = "/config/open/getrestconnectionconfig")
 	public ResponseEntity<Object> getRESTConnectionConfig() {		
 		LOG.log(Level.INFO, "Calling API /config/open/getrestconnectionconfig");
@@ -37,47 +38,14 @@ public class QuotationControllerConfig {
 	}
 		
 	
+	// Services for ADMIN only
+	
 	@RequestMapping(value = "/config/admin/viewallreferncedata")
-	public ResponseEntity<Object> viewAllRefernceDataByAdmin() {		
+	public ResponseEntity<Object> viewAllRefernceData() {		
 		LOG.log(Level.INFO, "Calling API /config/admin/viewallreferncedata");
 		return new ResponseEntity<Object>(
-			referenceDataService.viewAllRefernceData(UserRole.ADMIN.toString()), HttpStatus.OK);		
+			referenceDataService.viewAllRefernceData(), HttpStatus.OK);		
 	}
-	
-	@RequestMapping(value = "/config/admin/viewreferencedatabygroup")
-	public ResponseEntity<Object> viewReferenceDataByGroupByAdmin(@PathVariable("group") String group) {		
-		LOG.log(Level.INFO, "Calling API /config/admin/viewreferencedatabygroup");
-		return new ResponseEntity<Object>(
-			referenceDataService.viewReferenceDataByGroup(UserRole.ADMIN.toString(), group), HttpStatus.OK);		
-	}
-	
-	@RequestMapping(value = "/config/vendor/viewallreferncedata")
-	public ResponseEntity<Object> viewAllRefernceDataByVendor() {		
-		LOG.log(Level.INFO, "Calling API /config/admin/viewallreferncedata");
-		return new ResponseEntity<Object>(
-			referenceDataService.viewAllRefernceData(UserRole.VENDOR.toString()), HttpStatus.OK);		
-	}
-	
-	@RequestMapping(value = "/config/vendor/viewreferencedatabygroup")
-	public ResponseEntity<Object> viewReferenceDataByGroupByVendor(@PathVariable("group") String group) {		
-		LOG.log(Level.INFO, "Calling API /config/admin/viewreferencedatabygroup");
-		return new ResponseEntity<Object>(
-			referenceDataService.viewReferenceDataByGroup(UserRole.VENDOR.toString(), group), HttpStatus.OK);		
-	}
-	
-	@RequestMapping(value = "/config/user/viewallreferncedata")
-	public ResponseEntity<Object> viewAllRefernceDataByUser() {		
-		LOG.log(Level.INFO, "Calling API /config/admin/viewallreferncedata");
-		return new ResponseEntity<Object>(
-			referenceDataService.viewAllRefernceData(UserRole.USER.toString()), HttpStatus.OK);		
-	}
-	
-	@RequestMapping(value = "/config/user/viewreferencedatabygroup")
-	public ResponseEntity<Object> viewReferenceDataByGroupByUser(@PathVariable("group") String group) {		
-		LOG.log(Level.INFO, "Calling API /config/admin/viewreferencedatabygroup");
-		return new ResponseEntity<Object>(
-			referenceDataService.viewReferenceDataByGroup(UserRole.USER.toString(), group), HttpStatus.OK);		
-	}		
 	
 	@RequestMapping(value = "/config/admin/createreferencedata", method = RequestMethod.POST)
 	public ResponseEntity<Object> createReferenceData(@RequestBody ReferenceData refData) {		
@@ -93,6 +61,30 @@ public class QuotationControllerConfig {
 			listRefData.add(referenceDataService.createReferenceData(refData));
 		}
 		return new ResponseEntity<Object>(listRefData, HttpStatus.OK);		
+	}
+	
+	// Service for VENDOR only
+	
+	@RequestMapping(value = "/config/vendor/createreferencedata", method = RequestMethod.POST)
+	public ResponseEntity<Object> createReferenceDataByVendor(@RequestBody ReferenceData refData) {		
+		LOG.log(Level.INFO, "Calling API /config/vendor/createreferencedata");
+		return new ResponseEntity<Object>(referenceDataService.createReferenceData(refData), HttpStatus.OK);		
+	}
+	
+	@RequestMapping(value = "/config/vendor/viewreferencedatabygroup/{vendorId}/{refGroup}")
+	public ResponseEntity<Object> viewReferenceDataByGroupByVendor(@PathVariable("vendorId") String vendorId, @PathVariable("refGroup") String refGroup) {		
+		LOG.log(Level.INFO, "Calling API /config/vendor/viewreferencedatabygroup");
+		return new ResponseEntity<Object>(
+			referenceDataService.viewReferenceDataByRoleAndRefGroup(vendorId, refGroup), HttpStatus.OK);		
+	}
+	
+	// Service for USER only
+		
+	@RequestMapping(value = "/config/user/viewreferencedatabygroup/{vendorId}/{refGroup}")
+	public ResponseEntity<Object> viewReferenceDataByGroupByUser(@PathVariable("vendorId") String vendorId, @PathVariable("refGroup") String refGroup) {		
+		LOG.log(Level.INFO, "Calling API /config/user/viewreferencedatabygroup");
+		return new ResponseEntity<Object>(
+			referenceDataService.viewReferenceDataByRoleAndRefGroup(vendorId, refGroup), HttpStatus.OK);		
 	}
 			
 }

@@ -65,16 +65,16 @@ public class ReferenceDataService {
 	 * 
 	 * @return
 	 */	
-	public Map<String, List<ReferenceData>> viewAllRefernceData(String role) {
+	public Map<String, List<ReferenceData>> viewAllRefernceData() {
 
 		LOG.log(Level.INFO, "Calling AppConfig Service viewAllRefernceData()");
 		Map<String, List<ReferenceData>> refData = new HashMap<String, List<ReferenceData>>();			
 		
 		List<ReferenceData> refList;
 		for ( String refGroupName : queryAllReferenceGroup() ) {			
-			refList = viewReferenceDataByGroup(role, refGroupName);
+			refList = viewReferenceDataByRefGroup(refGroupName);
 			if ( !refList.isEmpty() )			
-				refData.put(refGroupName, viewReferenceDataByGroup(role, refGroupName));	
+				refData.put(refGroupName, refList);	
 		}
 		
 		return refData;
@@ -85,12 +85,21 @@ public class ReferenceDataService {
 	 * 
 	 * @return
 	 */	
-	public List<ReferenceData> viewReferenceDataByGroup(String role, String refGroup) {
+	public List<ReferenceData> viewReferenceDataByRefGroup(String refGroup) {
 
-		LOG.log(Level.INFO, "Calling AppConfig Service viewReferenceDataByGroup()");
+		LOG.log(Level.INFO, "Calling AppConfig Service viewReferenceDataByRefGroup()");
 		@SuppressWarnings("deprecation")
 		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "grantTo", "value");
-		return referenceDataRepository.searchByRoleAndRefGroup(role, refGroup, pageable);
+		return referenceDataRepository.searchByRefGroup(refGroup, pageable);
+	}
+	
+	
+	public List<ReferenceData> viewReferenceDataByRoleAndRefGroup(String grantTo, String refGroup) {
+
+		LOG.log(Level.INFO, "Calling AppConfig Service viewReferenceDataByRoleAndRefGroup()");
+		@SuppressWarnings("deprecation")
+		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "grantTo", "value");
+		return referenceDataRepository.searchByRoleAndRefGroup(grantTo, refGroup, pageable);
 	}
 	
 	/**
