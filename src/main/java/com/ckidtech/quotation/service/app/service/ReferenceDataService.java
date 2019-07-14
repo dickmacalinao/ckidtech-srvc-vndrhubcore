@@ -48,6 +48,8 @@ public class ReferenceDataService {
 		
 		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "value");
 		
+		refData.put("ServiceURL", referenceDataRepository.searchByRefGroup("ServiceURL", pageable));
+		
 		List<ReferenceData> refList;
 		for ( ReferenceData refGroup : referenceDataRepository.searchByRefGroup("ServiceURL", pageable) ) {		
 			String refId = refGroup.getId().split(":")[2];
