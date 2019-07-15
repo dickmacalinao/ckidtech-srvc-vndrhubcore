@@ -92,6 +92,7 @@ public class AppUserService {
 	}
 	
 	public QuotationResponse addAppUser(AppUser appUser) {		
+		
 		LOG.log(Level.INFO, "Calling AppUser Service addAppUser()");
 		
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -121,8 +122,6 @@ public class AppUserService {
 		
 			Vendor vendorRep = vendorRepository.findById(appUser.getVendor().toUpperCase()).orElse(null);
 			
-			LOG.log(Level.INFO, "appUser.getRole():" + appUser.getRole());
-			
 			// Verify if vendor exists and active
 			if ( !UserRole.ADMIN.toString().equalsIgnoreCase(appUser.getRole()) && 
 					(vendorRep==null || !vendorRep.isActiveIndicator() )) {
@@ -145,7 +144,6 @@ public class AppUserService {
 					
 					quotation.addMessage(msgController.createMsg("info.AURC"));
 					
-					LOG.log(Level.INFO, appUser.toString());
 				}
 			}
 		}
