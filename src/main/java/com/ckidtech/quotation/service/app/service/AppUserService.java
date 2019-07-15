@@ -179,32 +179,30 @@ public class AppUserService {
 			appUser.setUsername(appUser.getUsername().toUpperCase());
 		
 			Vendor vendorRep = vendorRepository.findById(appUser.getVendor().toUpperCase()).orElse(null);
-			
-			LOG.log(Level.INFO, "appUser.getRole():" + appUser.getRole());
-			
 			// Verify if vendor exists and active
 			if ( !UserRole.ADMIN.toString().equalsIgnoreCase(appUser.getRole()) && 
 					(vendorRep==null || !vendorRep.isActiveIndicator() )) {
 				quotation.addMessage(msgController.createMsg("error.VNFE"));
-			} else {
+			} 
+			
+			AppUser appUserRep = appUserRepository.findById(appUser.getUsername()).orElse(null);
+			// Verify if App User exists
+			if ( appUserRep==null ) {
+				quotation.addMessage(msgController.createMsg("error.AUNFE"));
+			}
+			
+			if( quotation.getMessages().isEmpty() ) {
 				
-				AppUser appUserRep = appUserRepository.findById(appUser.getUsername()).orElse(null);
+				Util.initalizeUpdatedInfo(appUserRep, appUserRep.getDifferences(appUser));	
+				appUserRep.setActiveIndicator(appUser.isActiveIndicator());
+				appUserRep.setName(appUser.getName());
+				appUserRep.setVendor(appUser.getVendor().toUpperCase());
+				appUserRep.setRole(appUser.getRole().toUpperCase());									
+				appUserRepository.save(appUserRep);
 				
-				if  ( appUserRep!=null ) {
-					Util.initalizeUpdatedInfo(appUserRep, appUserRep.getDifferences(appUser));	
-					appUserRep.setActiveIndicator(appUser.isActiveIndicator());
-					appUserRep.setName(appUser.getName());
-					appUserRep.setVendor(appUser.getVendor().toUpperCase());
-					appUserRep.setRole(appUser.getRole().toUpperCase());									
-					appUserRepository.save(appUserRep);
-					
-					appUserRep.setPassword("[Protected]");
-					quotation.setAppUser(appUserRep);	
-					
-					quotation.addMessage(msgController.createMsg("info.AURU"));
-				} else {
-					quotation.addMessage(msgController.createMsg("error.AUNFE"));
-				}
+				appUserRep.setPassword("[Protected]");
+				quotation.setAppUser(appUserRep);	
+				
 			}
 		}
 		
