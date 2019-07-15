@@ -28,7 +28,6 @@ import com.mongodb.client.MongoCursor;
 public class ReferenceDataService {
 
 	private static final Logger LOG = Logger.getLogger(ReferenceDataService.class.getName());
-
 	
 	@Autowired
 	private ReferenceDataRepository referenceDataRepository;
@@ -37,7 +36,7 @@ public class ReferenceDataService {
 	MongoTemplate mongoTemplate;
 
 	/**
-	 * View all App Config records
+	 * View all REST Connetion configuration. open and not secured
 	 * 
 	 * @return
 	 */	
@@ -67,7 +66,7 @@ public class ReferenceDataService {
 	 * 
 	 * @return
 	 */	
-	public Map<String, List<ReferenceData>> viewAllRefernceData() {
+	public Map<String, List<ReferenceData>> viewAllReferenceData() {
 
 		LOG.log(Level.INFO, "Calling AppConfig Service viewAllRefernceData()");
 		Map<String, List<ReferenceData>> refData = new HashMap<String, List<ReferenceData>>();			

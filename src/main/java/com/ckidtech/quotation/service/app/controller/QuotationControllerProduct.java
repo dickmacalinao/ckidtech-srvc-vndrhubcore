@@ -27,30 +27,44 @@ public class QuotationControllerProduct {
 	@Autowired
 	private ProductService productService;
 	
-	@RequestMapping(value = "/product/vendor/viewallproducts/{vendorCode}")
-	public ResponseEntity<Object> viewAllProducts(@PathVariable("vendorCode") String vendorCode) {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/viewallproducts/" + vendorCode);	
-		return new ResponseEntity<Object>(productService.viewAllProducts(vendorCode), HttpStatus.OK);		
+	@RequestMapping(value = "/product/vendor/listactiveproducts/{vendorCode}")
+	public ResponseEntity<Object> findActiveProducts(@PathVariable("vendorCode") String vendorCode) {		
+		LOG.log(Level.INFO, "Calling API /product/vendor/listactiveproducts/" + vendorCode);	
+		return new ResponseEntity<Object>(productService.listProducts(vendorCode, true), HttpStatus.OK);		
 	}
 	
-	
-	@RequestMapping(value = "/product/vendor/viewactiveproducts/{vendorCode}")
-	public ResponseEntity<Object> viewAllActiveProducts(@PathVariable("vendorCode") String vendorCode) {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/viewactiveproducts/" + vendorCode);	
-		return new ResponseEntity<Object>(productService.viewActiveProducts(vendorCode), HttpStatus.OK);		
+	@RequestMapping(value = "/product/vendor/listinactiveproducts/{vendorCode}")
+	public ResponseEntity<Object> finInActiveProducts(@PathVariable("vendorCode") String vendorCode) {		
+		LOG.log(Level.INFO, "Calling API /product/vendor/listinactiveproducts/" + vendorCode);	
+		return new ResponseEntity<Object>(productService.listProducts(vendorCode, false), HttpStatus.OK);		
 	}
 	
+	@RequestMapping(value = "/product/vendor/listactiveproductsbygroup/{vendorCode}/{group}")
+	public ResponseEntity<Object> findActiveProductsByGroup(@PathVariable("vendorCode") String vendorCode,
+			@PathVariable("group") String group) {		
+		LOG.log(Level.INFO, "Calling API /product/vendor/listactiveproductsbygroup/" + vendorCode + "/" + group);	
+		return new ResponseEntity<Object>(productService.listProductsByGroup(vendorCode, true, group), HttpStatus.OK);		
+	}
+	
+	@RequestMapping(value = "/product/vendor/listinactiveproductsbygroup/{vendorCode}/{group}")
+	public ResponseEntity<Object> findInActiveProductsByGroup(@PathVariable("vendorCode") String vendorCode,
+			@PathVariable("group") String group) {		
+		LOG.log(Level.INFO, "Calling API /product/vendor/listinactiveproductsbygroup/" + vendorCode + "/" + group);	
+		return new ResponseEntity<Object>(productService.listProductsByGroup(vendorCode, false, group), HttpStatus.OK);		
+	}
+	
+
 	
 	@RequestMapping(value = "/product/vendor/createproduct", method = RequestMethod.POST)
 	public ResponseEntity<Object> createProduct(@RequestBody Product product) {		
 		LOG.log(Level.INFO, "Calling API /product/vendor/createproduct:" + product + ")");				
-		return new ResponseEntity<Object>(productService.addProduct(product), HttpStatus.CREATED);		
+		return new ResponseEntity<Object>(productService.addVendorProduct(product), HttpStatus.CREATED);		
 	}
 	
 	@RequestMapping(value = "/product/vendor/updateproduct", method = RequestMethod.POST)
 	public ResponseEntity<Object> updateProduct(@RequestBody Product product) {		
 		LOG.log(Level.INFO, "Calling API /product/vendor/updateproduct:" + product + ")");				
-		return new ResponseEntity<Object>(productService.updateProduct(product), HttpStatus.OK);		
+		return new ResponseEntity<Object>(productService.updateVendorProduct(product), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/product/vendor/createproducts", method = RequestMethod.POST)
@@ -58,16 +72,15 @@ public class QuotationControllerProduct {
 		LOG.log(Level.INFO, "Calling API /product/vendor/createproducts:" + products + ")");	
 		ArrayList<QuotationResponse> quotations = new ArrayList<QuotationResponse>();  
 		for(Product product : products) {
-			quotations.add(productService.addProduct(product));
+			quotations.add(productService.addVendorProduct(product));
 		}
 		return new ResponseEntity<Object>(quotations, HttpStatus.CREATED);		
 	}
 		
-	@RequestMapping(value = "/product/vendor/deletevendorproduct/{vendorCode}/{productCode}")
-	public ResponseEntity<Object> deleteVendorProduct(@PathVariable("vendorCode") String vendorCode,
-			@PathVariable("productCode") String productCode) {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/deleteVendorProduct/" + vendorCode);
-		return new ResponseEntity<Object>(productService.deleteVendorProduct(vendorCode, productCode), HttpStatus.OK);		
+	@RequestMapping(value = "/product/vendor/deletevendorproduct/{productCode}")
+	public ResponseEntity<Object> deleteVendorProduct(@PathVariable("productCode") String productCode) {		
+		LOG.log(Level.INFO, "Calling API /product/vendor/deletevendorproduct/" + productCode);
+		return new ResponseEntity<Object>(productService.deleteVendorProduct(productCode), HttpStatus.OK);		
 	}
 	
 }

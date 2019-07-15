@@ -32,7 +32,7 @@ public class ProductService {
 	@Autowired
 	private MessageController msgController;
 	
-	public QuotationResponse viewAllProducts(String vendorCode) {	
+	public QuotationResponse listProducts(String vendorCode, boolean flag) {	
 		
 		LOG.log(Level.INFO, "Calling Vendor Service viewAllProducts()");
 		QuotationResponse quotation = new QuotationResponse();	
@@ -43,17 +43,16 @@ public class ProductService {
 		if ( vendor==null || !vendor.isActiveIndicator() ) {
 			quotation.addMessage(msgController.createMsg("error.VNFE"));
 		} else {
-			//quotation.addVendor(vendor);
-			quotation.setProducts(productRepository.findAllProducts(vendorCode));
+			quotation.setProducts(productRepository.listProducts(vendorCode, flag));
 		}
 				
 		return quotation;
 		
 	}	
 	
-	public QuotationResponse viewActiveProducts(String vendorCode) {	
+	public QuotationResponse listProductsByGroup(String vendorCode, boolean flag, String group) {	
 		
-		LOG.log(Level.INFO, "Calling Vendor Service viewActiveProducts()");
+		LOG.log(Level.INFO, "Calling Vendor Service viewAllProducts()");
 		QuotationResponse quotation = new QuotationResponse();	
 		
 		// TODO: Verify that the session vendor id is same with the vendor id from json
@@ -62,26 +61,37 @@ public class ProductService {
 		if ( vendor==null || !vendor.isActiveIndicator() ) {
 			quotation.addMessage(msgController.createMsg("error.VNFE"));
 		} else {
-			//quotation.addVendor(vendor);
-			quotation.setProducts(productRepository.findActiveProducts(vendorCode, true));
+			quotation.setProducts(productRepository.listProductsByGroup(vendorCode, flag, group));
 		}
+				
 		return quotation;
 		
 	}
 	
-	public QuotationResponse findByProductName(String productName) {	
+	public QuotationResponse searchProductsByName(String vendorCode, boolean flag, String productName) {	
 		
 		LOG.log(Level.INFO, "Calling Vendor Service findByProductName()");
 		QuotationResponse quotation = new QuotationResponse();	
 		
 		// TODO: Verify that the session vendor id is same with the vendor id from json
-		quotation.setProducts(productRepository.findByProductName(productName, true));
+		
+		Vendor vendor = vendorRepository.findById(vendorCode).orElse(null);
+		if ( vendor==null || !vendor.isActiveIndicator() ) {
+			quotation.addMessage(msgController.createMsg("error.VNFE"));
+		} else {
+			quotation.setProducts(productRepository.searchProductsByName(vendorCode, flag, productName));
+		}
 		
 		return quotation;
 		
 	}	
 	
-	public QuotationResponse addProduct(Product product) {		
+	/**
+	 * Create New Product
+	 * @param product
+	 * @return
+	 */
+	public QuotationResponse addVendorProduct(Product product) {		
 		LOG.log(Level.INFO, "Calling Product Service addProduct()");
 		
 		QuotationResponse quotation = new QuotationResponse();
@@ -123,8 +133,7 @@ public class ProductService {
 					productRepository.save(product);					
 					quotation.addMessage(msgController.createMsg("info.VPRC"));
 					quotation.setProduct(product);
-				}				
-				//quotation.addVendor(vendorRep);
+				}	
 			}
 		}
 		
@@ -132,7 +141,12 @@ public class ProductService {
 			
 	}
 	
-	public QuotationResponse updateProduct(Product product) {		
+	/**
+	 * Update Vendor Product
+	 * @param product
+	 * @return
+	 */
+	public QuotationResponse updateVendorProduct(Product product) {		
 		LOG.log(Level.INFO, "Calling Product Service updateProduct()");
 		
 		QuotationResponse quotation = new QuotationResponse();
@@ -173,8 +187,7 @@ public class ProductService {
 						quotation.addMessage(msgController.createMsg("info.VPRU"));
 						quotation.setProduct(productRep);
 					}						
-				} 				
-				//quotation.addVendor(vendorRep);
+				} 	
 			}
 		}
 		
@@ -182,56 +195,61 @@ public class ProductService {
 			
 	}
 	
-	public QuotationResponse deleteVendorProduct(String vendorCode, String productCode) {		
+	/**
+	 * Delete specific Product
+	 * @param productCode
+	 * @return
+	 */
+	public QuotationResponse deleteVendorProduct(String productCode) {		
 		LOG.log(Level.INFO, "Calling Vendor Service deleteVendorProduct()");	
 		
 		QuotationResponse quotation = new QuotationResponse();
-				
-		if ( vendorCode==null || "".equals(vendorCode) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Code"));	
+
 		if ( productCode==null || "".equals(productCode) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "Product Code"));	
-		
+			quotation.addMessage(msgController.createMsg("error.MFE", "Product Code"));			
 		
 		if( quotation.getMessages().isEmpty() ) {
-			Vendor vendorRep = vendorRepository.findById(vendorCode).orElse(null);
 			
-			if ( vendorRep==null ) {
-				quotation.addMessage(msgController.createMsg("error.VNFE"));
+			Product productRep = productRepository.findById(productCode).orElse(null);
+				
+			if ( productRep==null ) {
+				quotation.addMessage(msgController.createMsg("error.VPNFE"));
 			} else {
-				
-				Product productRep = productRepository.findProduct(vendorCode, productCode);
-				
-				if ( productRep==null ) {
-					quotation.addMessage(msgController.createMsg("error.VPNFE"));
+				if ( productRep.isActiveIndicator() ) { 
+					productRep.setActiveIndicator(false);
+					Util.initalizeUpdatedInfo(productRep, msgController.getMsg("info.VPRD"));				
+					productRepository.save(productRep);
 				} else {
-					if ( productRep.isActiveIndicator() ) { 
-						productRep.setActiveIndicator(false);
-						Util.initalizeUpdatedInfo(productRep, msgController.getMsg("info.VPRD"));				
-						productRepository.save(productRep);
-					} else {
-						quotation.addMessage(msgController.createMsg("error.VPADE"));
-					}
-					
-					quotation.addProduct(productRep);
-					
+					quotation.addMessage(msgController.createMsg("error.VPADE"));
 				}
 				
+				quotation.addProduct(productRep);
+				
 			}
-			quotation.addVendor(vendorRep);
-			
 		}			
 		
 		return quotation;
 	}
 
+	
+	/**
+	 * Delete all products under given vendor
+	 * @param vendorCode
+	 */
 	public void deleteAllVendorProducts(String vendorCode) {	
 		
 		LOG.log(Level.INFO, "Calling Vendor Service deleteAllVendorProducts()");
-		QuotationResponse quotation = viewAllProducts(vendorCode);
 		
+		// Delete active products
+		QuotationResponse quotation = listProducts(vendorCode, true);		
 		for (Product product : quotation.getProducts() ) {
-			deleteVendorProduct(vendorCode, product.getId());
+			deleteVendorProduct(product.getId());
+		}
+		
+		// Delete inactive products
+		quotation = listProducts(vendorCode, false);		
+		for (Product product : quotation.getProducts() ) {
+			deleteVendorProduct(product.getId());
 		}
 		
 	}

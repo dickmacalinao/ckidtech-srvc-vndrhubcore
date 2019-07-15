@@ -44,7 +44,7 @@ public class QuotationControllerConfig {
 	public ResponseEntity<Object> viewAllRefernceData() {		
 		LOG.log(Level.INFO, "Calling API /config/admin/viewallreferncedata");
 		return new ResponseEntity<Object>(
-			referenceDataService.viewAllRefernceData(), HttpStatus.OK);		
+			referenceDataService.viewAllReferenceData(), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/config/admin/createreferencedata", method = RequestMethod.POST)
