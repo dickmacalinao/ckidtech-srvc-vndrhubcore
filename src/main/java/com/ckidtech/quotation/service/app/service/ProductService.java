@@ -225,13 +225,14 @@ public class ProductService {
 		return quotation;
 	}
 
-	public QuotationResponse deleteAllVendorProducts(String vendorCode) {	
+	public void deleteAllVendorProducts(String vendorCode) {	
 		
 		LOG.log(Level.INFO, "Calling Vendor Service deleteAllVendorProducts()");
-		QuotationResponse quotation = new QuotationResponse();
-		productRepository.deleteAll();		
-		quotation.addMessage(msgController.createMsg("info.AVPSD"));	
-		return quotation;
+		QuotationResponse quotation = viewAllProducts(vendorCode);
+		
+		for (Product product : quotation.getProducts() ) {
+			deleteVendorProduct(vendorCode, product.getId());
+		}
 		
 	}
 	

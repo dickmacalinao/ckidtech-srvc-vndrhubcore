@@ -29,6 +29,12 @@ public class VendorService {
 
 	@Autowired
 	private VendorRepository vendorRepository;
+	
+	@Autowired
+	private AppUserService appUserService;
+	
+	@Autowired
+	private ProductService productService;
 
 	@Autowired
 	private MessageController msgController;
@@ -105,8 +111,7 @@ public class VendorService {
 
 				if (vendorRep.isActiveIndicator())
 					quotation.addMessage(msgController.createMsg("error.VAEE"));
-				else {
-					vendorRep.setActiveIndicator(true);
+				else {					
 					vendorRep.setName(vendor.getName());
 					vendorRep.setAddress(vendor.getAddress());
 					vendorRep.setContactNo(vendor.getContactNo());
@@ -210,12 +215,16 @@ public class VendorService {
 
 			if (vendorRep == null) {
 				quotation.addMessage(msgController.createMsg("error.VNFE"));
-			} else {				
+			} else {
+				
+				appUserService.deleteAllAppUser(vendorCode); // Delete all users under that vendor
+				productService.deleteAllVendorProducts(vendorCode); // Delete all products under that vendor
+				
 				vendorRepository.delete(vendorRep);
 				quotation.addMessage(msgController.createMsg("info.VRD"));
 
 			}
-			quotation.addVendor(vendorRep);
+			quotation.setVendor(vendorRep);
 
 		}
 
@@ -255,7 +264,7 @@ public class VendorService {
 				}
 
 			}
-			quotation.addVendor(vendorRep);
+			quotation.setVendor(vendorRep);
 
 		}
 
@@ -290,13 +299,16 @@ public class VendorService {
 				} else {
 					vendorRep.setActiveIndicator(false);
 					Util.initalizeUpdatedInfo(vendorRep, msgController.getMsg("info.VRDA"));
+					
+					appUserService.deActivateAllAppUser(vendorCode); // Deactivate all users under that vemdor
+					
 					vendorRepository.save(vendorRep);
 					quotation.addMessage(msgController.createMsg("info.VRDA"));
 				}
 				
 
 			}
-			quotation.addVendor(vendorRep);
+			quotation.setVendor(vendorRep);
 
 		}
 
