@@ -116,6 +116,7 @@ public class VendorService {
 					vendorRep.setAddress(vendor.getAddress());
 					vendorRep.setContactNo(vendor.getContactNo());
 					vendorRep.setImgLocation(vendor.getImgLocation());
+					vendorRep.setActiveIndicator(false);
 					Util.initalizeUpdatedInfo(vendorRep, msgController.getMsg("info.VRR"));
 					vendorRepository.save(vendorRep);
 					quotation.addMessage(msgController.createMsg("info.VRR"));
@@ -125,6 +126,7 @@ public class VendorService {
 
 			} else {
 				Util.initalizeCreatedInfo(vendor, msgController.getMsg("info.VRC"));
+				vendor.setActiveIndicator(false);
 				vendorRepository.save(vendor);
 				quotation.setVendor(vendor);
 				quotation.addMessage(msgController.createMsg("info.VRC"));

@@ -136,6 +136,7 @@ public class AppUserService {
 					appUser.setPassword(encoder.encode(appUser.getPassword())); //encode password
 					appUser.setVendor(appUser.getVendor().toUpperCase());
 					appUser.setRole(appUser.getRole().toUpperCase());
+					appUser.setActiveIndicator(false);
 					Util.initalizeCreatedInfo(appUser, msgController.getMsg("info.AURC"));					
 					appUserRepository.save(appUser);
 					
