@@ -39,22 +39,18 @@ public class QuotationControllerProduct {
 		return new ResponseEntity<Object>(productService.listProducts(vendorCode, false), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/product/vendor/listactiveproductsbygroup/{vendorCode}/{group}")
-	public ResponseEntity<Object> findActiveProductsByGroup(@PathVariable("vendorCode") String vendorCode,
-			@PathVariable("group") String group) {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/listactiveproductsbygroup/" + vendorCode + "/" + group);	
-		return new ResponseEntity<Object>(productService.listProductsByGroup(vendorCode, true, group), HttpStatus.OK);		
+	@RequestMapping(value = "/product/vendor/listactiveproductsbygroup/{vendorCode}")
+	public ResponseEntity<Object> findActiveProductsByGroup(@PathVariable("vendorCode") String vendorCode) {		
+		LOG.log(Level.INFO, "Calling API /product/vendor/listactiveproductsbygroup/" + vendorCode);	
+		return new ResponseEntity<Object>(productService.listProductsByGroup(vendorCode, true), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/product/vendor/listinactiveproductsbygroup/{vendorCode}/{group}")
-	public ResponseEntity<Object> findInActiveProductsByGroup(@PathVariable("vendorCode") String vendorCode,
-			@PathVariable("group") String group) {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/listinactiveproductsbygroup/" + vendorCode + "/" + group);	
-		return new ResponseEntity<Object>(productService.listProductsByGroup(vendorCode, false, group), HttpStatus.OK);		
+	@RequestMapping(value = "/product/vendor/listinactiveproductsbygroup/{vendorCode}")
+	public ResponseEntity<Object> findInActiveProductsByGroup(@PathVariable("vendorCode") String vendorCode) {		
+		LOG.log(Level.INFO, "Calling API /product/vendor/listinactiveproductsbygroup/" + vendorCode);	
+		return new ResponseEntity<Object>(productService.listProductsByGroup(vendorCode, false), HttpStatus.OK);		
 	}
-	
-
-	
+		
 	@RequestMapping(value = "/product/vendor/createproduct", method = RequestMethod.POST)
 	public ResponseEntity<Object> createProduct(@RequestBody Product product) {		
 		LOG.log(Level.INFO, "Calling API /product/vendor/createproduct:" + product + ")");				

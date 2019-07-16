@@ -1,18 +1,26 @@
 package com.ckidtech.quotation.service.app.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.stereotype.Service;
 
 import com.ckidtech.quotation.service.core.controller.MessageController;
 import com.ckidtech.quotation.service.core.controller.QuotationResponse;
 import com.ckidtech.quotation.service.core.dao.ProductRepository;
+import com.ckidtech.quotation.service.core.dao.ReferenceDataRepository;
 import com.ckidtech.quotation.service.core.dao.VendorRepository;
 import com.ckidtech.quotation.service.core.model.Product;
+import com.ckidtech.quotation.service.core.model.ProductGroup;
+import com.ckidtech.quotation.service.core.model.ReferenceData;
 import com.ckidtech.quotation.service.core.model.Vendor;
 import com.ckidtech.quotation.service.core.utils.Util;
 
@@ -28,6 +36,10 @@ public class ProductService {
 	
 	@Autowired
 	private ProductRepository productRepository;
+	
+	@Autowired
+	private ReferenceDataRepository referenceDataRepository;
+	
 	
 	@Autowired
 	private MessageController msgController;
@@ -50,10 +62,10 @@ public class ProductService {
 		
 	}	
 	
-	public QuotationResponse listProductsByGroup(String vendorCode, boolean flag, String group) {	
+	public QuotationResponse listProductsByGroup(String vendorCode, boolean flag) {
 		
 		LOG.log(Level.INFO, "Calling Vendor Service viewAllProducts()");
-		QuotationResponse quotation = new QuotationResponse();	
+		QuotationResponse quotation = new QuotationResponse();
 		
 		// TODO: Verify that the session vendor id is same with the vendor id from json
 		
@@ -61,8 +73,23 @@ public class ProductService {
 		if ( vendor==null || !vendor.isActiveIndicator() ) {
 			quotation.addMessage(msgController.createMsg("error.VNFE"));
 		} else {
-			quotation.setProducts(productRepository.listProductsByGroup(vendorCode, flag, group));
-		}
+			
+			List<ProductGroup> prodGroups = new ArrayList<ProductGroup>();
+			ProductGroup prodGroup;
+			
+			@SuppressWarnings("deprecation")
+			Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "grantTo", "value");
+			List<ReferenceData> groups =  referenceDataRepository.searchByRoleAndRefGroup(vendorCode, "ProductGroup", pageable);
+			for ( ReferenceData group : groups ) {
+				prodGroup = new ProductGroup();
+				prodGroup.setGroupName(group.getValue());				
+				prodGroup.setProducts(productRepository.listProductsByGroup(vendorCode, flag, group.getValue()));
+				prodGroups.add(prodGroup);
+			}
+			
+			quotation.setProdGroups(prodGroups);
+			
+		}		
 				
 		return quotation;
 		
