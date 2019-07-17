@@ -80,11 +80,14 @@ public class ProductService {
 			@SuppressWarnings("deprecation")
 			Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "grantTo", "value");
 			List<ReferenceData> groups =  referenceDataRepository.searchByRoleAndRefGroup(vendorCode, "ProductGroup", pageable);
+			int index = 0;
 			for ( ReferenceData group : groups ) {
 				prodGroup = new ProductGroup();
-				prodGroup.setTitle(group.getValue());				
+				prodGroup.setTitle(group.getValue());			
+				prodGroup.setKey(group.getValue() + index);
 				prodGroup.setProducts(productRepository.listProductsByGroup(vendorCode, flag, group.getValue()));
 				prodGroups.add(prodGroup);
+				index++;
 			}
 			
 			quotation.setProdGroups(prodGroups);
