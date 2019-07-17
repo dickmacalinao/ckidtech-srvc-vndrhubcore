@@ -135,13 +135,10 @@ public class ReferenceDataService {
 
 			if (refRep != null) {
 				quotation.addMessage(msgController.createMsg("error.RDAEE"));
-			} else {
-				refRep.setGrantTo(refData.getGrantTo());
-				refRep.setRefGroup(refData.getRefGroup());
-				refRep.setValue(refData.getValue());
-				refRep.setActiveIndicator(true);
-				Util.initalizeUpdatedInfo(refRep, msgController.getMsg("info.RDRC"));
-				referenceDataRepository.save(refRep);
+			} else {	
+				Util.initalizeUpdatedInfo(refData, msgController.getMsg("info.RDRC"));
+				refData.setActiveIndicator(true);
+				referenceDataRepository.save(refData);
 				quotation.addMessage(msgController.createMsg("info.RDRC"));
 			}
 		}
