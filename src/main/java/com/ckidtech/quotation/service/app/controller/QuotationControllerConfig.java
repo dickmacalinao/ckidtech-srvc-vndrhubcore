@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ckidtech.quotation.service.app.service.ReferenceDataService;
+import com.ckidtech.quotation.service.core.controller.QuotationResponse;
 import com.ckidtech.quotation.service.core.model.ReferenceData;
 
 @ComponentScan({"com.ckidtech.quotation.service.core.service"})
@@ -53,10 +54,11 @@ public class QuotationControllerConfig {
 		return new ResponseEntity<Object>(referenceDataService.createReferenceData(refData), HttpStatus.OK);		
 	}
 	
+	
 	@RequestMapping(value = "/config/admin/createreferencedatamultiple", method = RequestMethod.POST)
 	public ResponseEntity<Object> createReferenceDataMultiple(@RequestBody ReferenceData[] refDataMutiple) {		
 		LOG.log(Level.INFO, "Calling API /config/admin/createreferencedatamultiple");
-		List<ReferenceData> listRefData = new ArrayList<ReferenceData>();
+		List<QuotationResponse> listRefData = new ArrayList<QuotationResponse>();
 		for (ReferenceData refData : refDataMutiple) {
 			listRefData.add(referenceDataService.createReferenceData(refData));
 		}
@@ -69,6 +71,12 @@ public class QuotationControllerConfig {
 	public ResponseEntity<Object> createReferenceDataByVendor(@RequestBody ReferenceData refData) {		
 		LOG.log(Level.INFO, "Calling API /config/vendor/createreferencedata");
 		return new ResponseEntity<Object>(referenceDataService.createReferenceData(refData), HttpStatus.OK);		
+	}
+	
+	@RequestMapping(value = "/config/vendor/updatereferencedata", method = RequestMethod.POST)
+	public ResponseEntity<Object> updateReferenceDataByVendor(@RequestBody ReferenceData refData) {		
+		LOG.log(Level.INFO, "Calling API /config/vendor/updatereferencedata");
+		return new ResponseEntity<Object>(referenceDataService.updateReferenceData(refData), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/config/vendor/viewreferencedatabygroup/{vendorId}/{refGroup}")

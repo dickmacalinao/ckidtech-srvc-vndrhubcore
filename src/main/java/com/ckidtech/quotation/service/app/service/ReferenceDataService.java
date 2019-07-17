@@ -16,8 +16,11 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.stereotype.Service;
 
+import com.ckidtech.quotation.service.core.controller.MessageController;
+import com.ckidtech.quotation.service.core.controller.QuotationResponse;
 import com.ckidtech.quotation.service.core.dao.ReferenceDataRepository;
 import com.ckidtech.quotation.service.core.model.ReferenceData;
+import com.ckidtech.quotation.service.core.utils.Util;
 import com.mongodb.client.DistinctIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -33,7 +36,12 @@ public class ReferenceDataService {
 	private ReferenceDataRepository referenceDataRepository;
 	
 	@Autowired
+	private MessageController msgController;
+	
+	@Autowired
 	MongoTemplate mongoTemplate;
+	
+	
 
 	/**
 	 * View all REST Connetion configuration. open and not secured
@@ -108,9 +116,70 @@ public class ReferenceDataService {
 	 * 
 	 * @return
 	 */	
-	public ReferenceData createReferenceData(ReferenceData refData) {
+	public QuotationResponse createReferenceData(ReferenceData refData) {
 		LOG.log(Level.INFO, "Calling AppConfig Service createReferenceData()");
-		return referenceDataRepository.insert(refData);
+		
+		QuotationResponse quotation = new QuotationResponse();
+		if (refData.getGrantTo() == null || "".equals(refData.getGrantTo()))
+			quotation.addMessage(msgController.createMsg("error.MFE", "Grant To"));
+		if (refData.getRefGroup() == null || "".equals(refData.getRefGroup()))
+			quotation.addMessage(msgController.createMsg("error.MFE", "Reference Group"));
+		if (refData.getId() == null || "".equals(refData.getId()))
+			quotation.addMessage(msgController.createMsg("error.MFE", "ID"));
+		if (refData.getValue() == null || "".equals(refData.getValue()))
+			quotation.addMessage(msgController.createMsg("error.MFE", "Value"));
+		
+		if (quotation.getMessages().isEmpty()) {
+
+			ReferenceData refRep = referenceDataRepository.findById(refData.getId()).orElse(null);
+
+			if (refRep != null) {
+				quotation.addMessage(msgController.createMsg("error.RDAEE"));
+			} else {
+				refRep.setGrantTo(refData.getGrantTo());
+				refRep.setRefGroup(refData.getRefGroup());
+				refRep.setValue(refData.getValue());
+				refRep.setActiveIndicator(true);
+				Util.initalizeUpdatedInfo(refRep, msgController.getMsg("info.RDRC"));
+				referenceDataRepository.save(refRep);
+				quotation.addMessage(msgController.createMsg("info.RDRC"));
+			}
+		}
+		
+		return quotation;
+	}
+	
+	public QuotationResponse updateReferenceData(ReferenceData refData) {
+		LOG.log(Level.INFO, "Calling AppConfig Service updateReferenceData()");
+		
+		QuotationResponse quotation = new QuotationResponse();
+		if (refData.getGrantTo() == null || "".equals(refData.getGrantTo()))
+			quotation.addMessage(msgController.createMsg("error.MFE", "Grant To"));
+		if (refData.getRefGroup() == null || "".equals(refData.getRefGroup()))
+			quotation.addMessage(msgController.createMsg("error.MFE", "Reference Group"));
+		if (refData.getId() == null || "".equals(refData.getId()))
+			quotation.addMessage(msgController.createMsg("error.MFE", "ID"));
+		if (refData.getValue() == null || "".equals(refData.getValue()))
+			quotation.addMessage(msgController.createMsg("error.MFE", "Value"));
+		
+		if (quotation.getMessages().isEmpty()) {
+
+			ReferenceData refRep = referenceDataRepository.findById(refData.getId()).orElse(null);
+
+			if (refRep == null) {
+				quotation.addMessage(msgController.createMsg("error.RDNFE"));
+			} else {
+				refRep.setGrantTo(refData.getGrantTo());
+				refRep.setRefGroup(refData.getRefGroup());
+				refRep.setValue(refData.getValue());
+				refRep.setActiveIndicator(true);
+				Util.initalizeUpdatedInfo(refRep, msgController.getMsg("info.RDRU"));
+				referenceDataRepository.save(refRep);
+				quotation.addMessage(msgController.createMsg("info.RDRU"));
+			}
+		}
+		
+		return quotation;
 	}
 	
 	public List<String> queryAllReferenceGroup() {
