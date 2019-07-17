@@ -82,7 +82,7 @@ public class ProductService {
 			List<ReferenceData> groups =  referenceDataRepository.searchByRoleAndRefGroup(vendorCode, "ProductGroup", pageable);
 			for ( ReferenceData group : groups ) {
 				prodGroup = new ProductGroup();
-				prodGroup.setGroupName(group.getValue());				
+				prodGroup.setTitle(group.getValue());				
 				prodGroup.setProducts(productRepository.listProductsByGroup(vendorCode, flag, group.getValue()));
 				prodGroups.add(prodGroup);
 			}
