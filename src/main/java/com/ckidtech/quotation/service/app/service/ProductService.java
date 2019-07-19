@@ -202,11 +202,11 @@ public class ProductService {
 				Product productRep = productRepository.findById(product.getId()).orElse(null);
 				
 				if  ( productRep==null ) {
-					quotation.addMessage(msgController.createMsg("error.VPNEE"));
+					quotation.addMessage(msgController.createMsg("error.VPNFE"));
 				} else {	
 					
 					if ( !productRep.isActiveIndicator() ) {
-						quotation.addMessage(msgController.createMsg("error.VPNEE"));
+						quotation.addMessage(msgController.createMsg("error.VPNFE"));
 					} else {
 						productRep.setActiveIndicator(true);
 						productRep.setName(product.getName());
@@ -217,6 +217,48 @@ public class ProductService {
 						quotation.addMessage(msgController.createMsg("info.VPRU"));
 						quotation.setProduct(productRep);
 					}						
+				} 	
+			}
+		}
+		
+		return quotation;
+			
+	}
+	
+	/**
+	 * Update Vendor Product
+	 * @param product
+	 * @return
+	 */
+	public QuotationResponse activateVendorProduct(Product product) {		
+		LOG.log(Level.INFO, "Calling Product Service updateProduct()");
+		
+		QuotationResponse quotation = new QuotationResponse();
+		
+		// TODO: Verify that the session vendor id is same with the vendor id from json
+		
+		if ( product.getId()==null || "".equals(product.getId()) ) 
+			quotation.addMessage(msgController.createMsg("error.MFE", "Product Code"));	
+		if ( product.getVendorCode()==null || "".equals(product.getVendorCode()) ) 
+			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Code"));
+		
+		if( quotation.getMessages().isEmpty() ) {
+		
+			Vendor vendorRep = vendorRepository.findById(product.getVendorCode()).orElse(null);
+			
+			if ( vendorRep==null || !vendorRep.isActiveIndicator() ) {
+				quotation.addMessage(msgController.createMsg("error.VNFE"));
+			} else {
+				Product productRep = productRepository.findById(product.getId()).orElse(null);
+				
+				if  ( productRep==null ) {
+					quotation.addMessage(msgController.createMsg("error.VPNFE"));
+				} else {
+					productRep.setActiveIndicator(true);						
+					Util.initalizeUpdatedInfo(productRep, msgController.getMsg("info.VPRA"));
+					productRepository.save(productRep);
+					quotation.addMessage(msgController.createMsg("info.VPRA"));
+					quotation.setProduct(productRep);
 				} 	
 			}
 		}

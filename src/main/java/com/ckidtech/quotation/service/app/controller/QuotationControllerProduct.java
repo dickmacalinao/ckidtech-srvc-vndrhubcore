@@ -63,6 +63,12 @@ public class QuotationControllerProduct {
 		return new ResponseEntity<Object>(productService.updateVendorProduct(product), HttpStatus.OK);		
 	}
 	
+	@RequestMapping(value = "/product/vendor/activateproduct", method = RequestMethod.POST)
+	public ResponseEntity<Object> activateProduct(@RequestBody Product product) {		
+		LOG.log(Level.INFO, "Calling API /product/vendor/activateproduct:" + product + ")");				
+		return new ResponseEntity<Object>(productService.activateVendorProduct(product), HttpStatus.OK);		
+	}
+	
 	@RequestMapping(value = "/product/vendor/createproducts", method = RequestMethod.POST)
 	public ResponseEntity<Object> createProducts(@RequestBody Product[] products) {		
 		LOG.log(Level.INFO, "Calling API /product/vendor/createproducts:" + products + ")");	
