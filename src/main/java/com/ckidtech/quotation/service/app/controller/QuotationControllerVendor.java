@@ -84,13 +84,6 @@ public class QuotationControllerVendor {
 		LOG.log(Level.INFO, "Calling API /vendor/vendor/updatevendor:" + vendor + ")");		
 		return new ResponseEntity<Object>(vendorService.updateVendor(vendor), HttpStatus.OK);		
 	}
-
-	
-	@RequestMapping(value = "/vendor/admin/deletevendor/{vendorCode}", method = RequestMethod.DELETE)
-	public ResponseEntity<Object> deleteVendor(@PathVariable("vendorCode") String vendorCode) {		
-		LOG.log(Level.INFO, "Calling API /vendor/admin/deletevendor:" + vendorCode + ")");
-		return new ResponseEntity<Object>(vendorService.deleteVendor(vendorCode), HttpStatus.OK);		
-	}
 	
 	@RequestMapping(value = "/vendor/admin/activatevendor/{vendorCode}")
 	public ResponseEntity<Object> activateeVendor(@PathVariable("vendorCode") String vendorCode) {		
