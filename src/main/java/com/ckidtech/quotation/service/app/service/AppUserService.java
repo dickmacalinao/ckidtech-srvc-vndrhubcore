@@ -46,7 +46,7 @@ public class AppUserService {
 	public List<AppUser> adminFindAllAppUsers() {
 
 		LOG.log(Level.INFO, "Calling AppUser Service adminFindAllAppUsers()");		
-		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "name");
+		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "vendor, role, name");
 		List<AppUser> listAppUser = appUserRepository.adminSearchByName("", pageable);
 		for(AppUser appUser : listAppUser) {
 			appUser.setPassword("[PROTECTED]");
@@ -58,7 +58,7 @@ public class AppUserService {
 	public List<AppUser> adminSearchAppUsers(String name) {
 
 		LOG.log(Level.INFO, "Calling AppUser Service adminSearchAppUsers()");	
-		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "name");
+		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "vendor, role, name");
 		List<AppUser> listAppUser = appUserRepository.adminSearchByName(name, pageable);
 		for(AppUser appUser : listAppUser) {
 			appUser.setPassword("[PROTECTED]");
