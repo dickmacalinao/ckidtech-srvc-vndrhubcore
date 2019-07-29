@@ -57,7 +57,8 @@ public class QuotationControllerConfig {
 			@RequestBody ReferenceData refData) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /config/admin/createreferencedata");
 		Util.checkAccessGrant(authorization, UserRole.ADMIN, null);
-		return new ResponseEntity<Object>(referenceDataService.createReferenceData(refData), HttpStatus.OK);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(referenceDataService.createReferenceData(userId, refData), HttpStatus.OK);		
 	}
 	
 	
@@ -66,9 +67,10 @@ public class QuotationControllerConfig {
 			@RequestBody ReferenceData[] refDataMutiple) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /config/admin/createreferencedatamultiple");
 		Util.checkAccessGrant(authorization, UserRole.ADMIN, null);
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
 		List<QuotationResponse> listRefData = new ArrayList<QuotationResponse>();
 		for (ReferenceData refData : refDataMutiple) {
-			listRefData.add(referenceDataService.createReferenceData(refData));
+			listRefData.add(referenceDataService.createReferenceData(userId, refData));
 		}
 		return new ResponseEntity<Object>(listRefData, HttpStatus.OK);		
 	}
@@ -80,7 +82,8 @@ public class QuotationControllerConfig {
 			@RequestBody ReferenceData refData) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /config/vendor/createreferencedata");
 		Util.checkAccessGrant(authorization, UserRole.VENDOR, null);
-		return new ResponseEntity<Object>(referenceDataService.createReferenceData(refData), HttpStatus.OK);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(referenceDataService.createReferenceData(userId, refData), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/config/vendor/updatereferencedata", method = RequestMethod.POST)
@@ -88,7 +91,8 @@ public class QuotationControllerConfig {
 			@RequestBody ReferenceData refData) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /config/vendor/updatereferencedata");
 		Util.checkAccessGrant(authorization, UserRole.VENDOR, null);
-		return new ResponseEntity<Object>(referenceDataService.updateReferenceData(refData), HttpStatus.OK);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(referenceDataService.updateReferenceData(userId, refData), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/config/vendor/viewreferencedatabygroup/{refGroup}")

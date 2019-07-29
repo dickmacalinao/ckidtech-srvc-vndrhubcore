@@ -68,7 +68,8 @@ public class QuotationControllerVendor {
 			@RequestBody Vendor vendor) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /vendor/admin/createvendor:" + vendor + ")");
 		Util.checkAccessGrant(authorization, UserRole.ADMIN, null);
-		return new ResponseEntity<Object>(vendorService.addVendor(vendor), HttpStatus.CREATED);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(vendorService.addVendor(userId, vendor), HttpStatus.CREATED);		
 	}
 	
 	@RequestMapping(value = "/vendor/admin/createvendors", method = RequestMethod.POST)
@@ -76,9 +77,10 @@ public class QuotationControllerVendor {
 			@RequestBody Vendor[] vendors) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /vendor/admin/createvendors");
 		Util.checkAccessGrant(authorization, UserRole.ADMIN, null);
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
 		ArrayList<QuotationResponse> quotations = new ArrayList<QuotationResponse>();  
 		for (Vendor vendor : vendors) {
-			quotations.add(vendorService.addVendor(vendor));
+			quotations.add(vendorService.addVendor(userId, vendor));
 		}
 		return new ResponseEntity<Object>(quotations, HttpStatus.CREATED);		
 	}
@@ -88,23 +90,34 @@ public class QuotationControllerVendor {
 			@RequestBody Vendor vendor) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /vendor/admin/updatevendor:" + vendor + ")");	
 		Util.checkAccessGrant(authorization, UserRole.ADMIN, null);
-		return new ResponseEntity<Object>(vendorService.updateVendor(vendor), HttpStatus.OK);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(vendorService.updateVendor(userId, vendor), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/vendor/admin/activatevendor/{vendorCode}")
-	public ResponseEntity<Object> activateeVendor(@RequestHeader("authorization") String authorization, 
+	public ResponseEntity<Object> activateVendor(@RequestHeader("authorization") String authorization, 
 			@PathVariable("vendorCode") String vendorCode) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /vendor/admin/activateevendor:" + vendorCode + ")");
 		Util.checkAccessGrant(authorization, UserRole.ADMIN, null);
-		return new ResponseEntity<Object>(vendorService.activateVendor(vendorCode), HttpStatus.OK);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(vendorService.activateVendor(userId, vendorCode), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/vendor/admin/deactivatevendor/{vendorCode}")
-	public ResponseEntity<Object> deActivateeVendor(@RequestHeader("authorization") String authorization, 
+	public ResponseEntity<Object> deActivateVendor(@RequestHeader("authorization") String authorization, 
 			@PathVariable("vendorCode") String vendorCode) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /vendor/admin/deactivateevendor:" + vendorCode + ")");
 		Util.checkAccessGrant(authorization, UserRole.ADMIN, null);
-		return new ResponseEntity<Object>(vendorService.deActivateVendor(vendorCode), HttpStatus.OK);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(vendorService.deActivateVendor(userId, vendorCode), HttpStatus.OK);		
+	}
+	
+	@RequestMapping(value = "/vendor/admin/deletevendor/{vendorCode}")
+	public ResponseEntity<Object> deleteVendor(@RequestHeader("authorization") String authorization, 
+			@PathVariable("vendorCode") String vendorCode) throws Exception {		
+		LOG.log(Level.INFO, "Calling API /vendor/admin/deactivateevendor:" + vendorCode + ")");
+		Util.checkAccessGrant(authorization, UserRole.ADMIN, null);
+		return new ResponseEntity<Object>(vendorService.deleteVendor(vendorCode), HttpStatus.OK);		
 	}
 	
 	// Vendor Services
@@ -122,7 +135,8 @@ public class QuotationControllerVendor {
 			@RequestBody Vendor vendor) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /vendor/vendor/updatevendor:" + vendor + ")");		
 		Util.checkAccessGrant(authorization, UserRole.VENDOR, vendor.getId());
-		return new ResponseEntity<Object>(vendorService.updateVendor(vendor), HttpStatus.OK);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(vendorService.updateVendor(userId, vendor), HttpStatus.OK);		
 	}
 	
 }

@@ -117,7 +117,7 @@ public class ProductService {
 	 * @param product
 	 * @return
 	 */
-	public QuotationResponse addVendorProduct(Product product) {		
+	public QuotationResponse addVendorProduct(String userId, Product product) {		
 		LOG.log(Level.INFO, "Calling Product Service addProduct()");
 		
 		QuotationResponse quotation = new QuotationResponse();
@@ -146,14 +146,14 @@ public class ProductService {
 						quotation.addMessage(msgController.createMsg("error.VPAEE"));
 					} else {
 						productRep.setActiveIndicator(true);
-						Util.initalizeUpdatedInfo(productRep, msgController.getMsg("info.VPRR"));
+						Util.initalizeUpdatedInfo(productRep, userId, msgController.getMsg("info.VPRR"));
 						productRepository.save(productRep);
 						quotation.addMessage(msgController.createMsg("info.VPRR"));
 						quotation.setProduct(productRep);
 					}
 						
 				} else {
-					Util.initalizeCreatedInfo(product, msgController.getMsg("info.VPRC"));
+					Util.initalizeCreatedInfo(product, userId, msgController.getMsg("info.VPRC"));
 					productRepository.save(product);					
 					quotation.addMessage(msgController.createMsg("info.VPRC"));
 					quotation.setProduct(product);
@@ -170,7 +170,7 @@ public class ProductService {
 	 * @param product
 	 * @return
 	 */
-	public QuotationResponse updateVendorProduct(Product product) {		
+	public QuotationResponse updateVendorProduct(String userId, Product product) {		
 		LOG.log(Level.INFO, "Calling Product Service updateProduct()");
 		
 		QuotationResponse quotation = new QuotationResponse();
@@ -204,7 +204,7 @@ public class ProductService {
 						productRep.setName(product.getName());
 						productRep.setGroup(product.getGroup());
 						productRep.setImgLocation(product.getImgLocation());
-						Util.initalizeUpdatedInfo(productRep, msgController.getMsg("info.VPRU"));
+						Util.initalizeUpdatedInfo(productRep, userId, msgController.getMsg("info.VPRU"));
 						productRepository.save(productRep);
 						quotation.addMessage(msgController.createMsg("info.VPRU"));
 						quotation.setProduct(productRep);
@@ -222,7 +222,7 @@ public class ProductService {
 	 * @param product
 	 * @return
 	 */
-	public QuotationResponse activateVendorProduct(Product product) {		
+	public QuotationResponse activateVendorProduct(String userId, Product product) {		
 		LOG.log(Level.INFO, "Calling Product Service updateProduct()");
 		
 		QuotationResponse quotation = new QuotationResponse();
@@ -245,7 +245,7 @@ public class ProductService {
 					quotation.addMessage(msgController.createMsg("error.VPNFE"));
 				} else {
 					productRep.setActiveIndicator(true);						
-					Util.initalizeUpdatedInfo(productRep, msgController.getMsg("info.VPRA"));
+					Util.initalizeUpdatedInfo(productRep, userId, msgController.getMsg("info.VPRA"));
 					productRepository.save(productRep);
 					quotation.addMessage(msgController.createMsg("info.VPRA"));
 					quotation.setProduct(productRep);
@@ -283,9 +283,7 @@ public class ProductService {
 						throw new ServiceAccessResourceFailureException();
 					}
 					
-					productRep.setActiveIndicator(false);
-					Util.initalizeUpdatedInfo(productRep, msgController.getMsg("info.VPRD"));				
-					productRepository.save(productRep);
+					productRepository.delete(productRep);
 				} else {
 					quotation.addMessage(msgController.createMsg("error.VPADE"));
 				}

@@ -116,7 +116,7 @@ public class ReferenceDataService {
 	 * 
 	 * @return
 	 */	
-	public QuotationResponse createReferenceData(ReferenceData refData) {
+	public QuotationResponse createReferenceData(String userId, ReferenceData refData) {
 		LOG.log(Level.INFO, "Calling AppConfig Service createReferenceData()");
 		
 		QuotationResponse quotation = new QuotationResponse();
@@ -136,7 +136,7 @@ public class ReferenceDataService {
 			if (refRep != null) {
 				quotation.addMessage(msgController.createMsg("error.RDAEE"));
 			} else {	
-				Util.initalizeUpdatedInfo(refData, msgController.getMsg("info.RDRC"));
+				Util.initalizeCreatedInfo(refData, userId, msgController.getMsg("info.RDRC"));
 				refData.setActiveIndicator(true);
 				referenceDataRepository.save(refData);
 				quotation.addMessage(msgController.createMsg("info.RDRC"));
@@ -146,7 +146,7 @@ public class ReferenceDataService {
 		return quotation;
 	}
 	
-	public QuotationResponse updateReferenceData(ReferenceData refData) {
+	public QuotationResponse updateReferenceData(String userId, ReferenceData refData) {
 		LOG.log(Level.INFO, "Calling AppConfig Service updateReferenceData()");
 		
 		QuotationResponse quotation = new QuotationResponse();
@@ -170,7 +170,7 @@ public class ReferenceDataService {
 				refRep.setRefGroup(refData.getRefGroup());
 				refRep.setValue(refData.getValue());
 				refRep.setActiveIndicator(true);
-				Util.initalizeUpdatedInfo(refRep, msgController.getMsg("info.RDRU"));
+				Util.initalizeUpdatedInfo(refRep, userId, msgController.getMsg("info.RDRU"));
 				referenceDataRepository.save(refRep);
 				quotation.addMessage(msgController.createMsg("info.RDRU"));
 			}

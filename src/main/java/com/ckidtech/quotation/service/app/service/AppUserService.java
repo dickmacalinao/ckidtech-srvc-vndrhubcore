@@ -92,7 +92,7 @@ public class AppUserService {
 
 	}
 	
-	public QuotationResponse addAppUser(AppUser appUser) {		
+	public QuotationResponse addAppUser(String userId, AppUser appUser) {		
 		
 		LOG.log(Level.INFO, "Calling AppUser Service addAppUser()");
 		
@@ -138,7 +138,7 @@ public class AppUserService {
 					appUser.setVendor(appUser.getVendor().toUpperCase());
 					appUser.setRole(appUser.getRole().toUpperCase());
 					appUser.setActiveIndicator(false);
-					Util.initalizeCreatedInfo(appUser, msgController.getMsg("info.AURC"));					
+					Util.initalizeCreatedInfo(appUser, userId, msgController.getMsg("info.AURC"));					
 					appUserRepository.save(appUser);
 					
 					appUser.setPassword("[Protected]");
@@ -154,7 +154,7 @@ public class AppUserService {
 			
 	}
 	
-	public QuotationResponse updateAppUser(AppUser appUser) {		
+	public QuotationResponse updateAppUser(String userId, AppUser appUser) {		
 		LOG.log(Level.INFO, "Calling AppUser Service updateAppUser()");
 		
 		QuotationResponse quotation = new QuotationResponse();
@@ -195,7 +195,7 @@ public class AppUserService {
 			
 			if( quotation.getMessages().isEmpty() ) {
 				
-				Util.initalizeUpdatedInfo(appUserRep, appUserRep.getDifferences(appUser));	
+				Util.initalizeUpdatedInfo(appUserRep, userId, appUserRep.getDifferences(appUser));	
 				appUserRep.setActiveIndicator(appUser.isActiveIndicator());
 				appUserRep.setName(appUser.getName());
 				appUserRep.setVendor(appUser.getVendor().toUpperCase());
@@ -250,7 +250,7 @@ public class AppUserService {
 	 * @param appUserId
 	 * @return
 	 */
-	public QuotationResponse activateAppUser(UserRole role, String vendorId, String appUserId) {
+	public QuotationResponse activateAppUser(UserRole role, String vendorId, String userId, String appUserId) {
 		
 		LOG.log(Level.INFO, "Calling AppUser Service activateAppUser()");
 		
@@ -276,7 +276,7 @@ public class AppUserService {
 					}
 					
 					appUserRep.setActiveIndicator(true);
-					Util.initalizeUpdatedInfo(appUserRep, msgController.getMsg("info.AURA"));
+					Util.initalizeUpdatedInfo(appUserRep, userId, msgController.getMsg("info.AURA"));
 					appUserRepository.save(appUserRep);
 					quotation.addMessage(msgController.createMsg("info.AURA"));				
 				}
@@ -298,7 +298,7 @@ public class AppUserService {
 	 * @param appUserId
 	 * @return
 	 */
-	public QuotationResponse deActivateAppUser(UserRole role, String vendorId, String appUserId) {
+	public QuotationResponse deActivateAppUser(UserRole role, String vendorId, String userId, String appUserId) {
 		
 		LOG.log(Level.INFO, "Calling AppUser Service deActivateAppUser()");
 		
@@ -324,7 +324,7 @@ public class AppUserService {
 					}
 					
 					appUserRep.setActiveIndicator(false);
-					Util.initalizeUpdatedInfo(appUserRep, msgController.getMsg("info.AURDA"));
+					Util.initalizeUpdatedInfo(appUserRep, userId, msgController.getMsg("info.AURDA"));
 					appUserRepository.save(appUserRep);
 					quotation.addMessage(msgController.createMsg("info.AURDA"));				
 				}
@@ -338,13 +338,13 @@ public class AppUserService {
 		return quotation;
 	}
 	
-	public void deActivateAllAppUser(String vendor) {
+	public void deActivateAllAppUser(String userId, String vendor) {
 
 		LOG.log(Level.INFO, "Calling AppUser Service deActivateAllAppUser()");		
 		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "name");
 		List<AppUser> listAppUser = appUserRepository.vendorFindAllAppUsers(vendor, pageable);
 		for(AppUser appUser : listAppUser) {
-			deActivateAppUser(UserRole.ADMIN, null, appUser.getId());
+			deActivateAppUser(UserRole.ADMIN, appUser.getVendor(), userId, appUser.getId());
 		}
 
 	}

@@ -67,7 +67,8 @@ public class QuotationControllerProduct {
 			@RequestBody Product product) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /product/vendor/createproduct:" + product + ")");		
 		Util.checkAccessGrant(authorization, UserRole.VENDOR, product.getVendorCode());
-		return new ResponseEntity<Object>(productService.addVendorProduct(product), HttpStatus.CREATED);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(productService.addVendorProduct(userId, product), HttpStatus.CREATED);		
 	}
 	
 	@RequestMapping(value = "/product/vendor/updateproduct", method = RequestMethod.POST)
@@ -75,7 +76,8 @@ public class QuotationControllerProduct {
 			@RequestBody Product product) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /product/vendor/updateproduct:" + product + ")");
 		Util.checkAccessGrant(authorization, UserRole.VENDOR, product.getVendorCode());
-		return new ResponseEntity<Object>(productService.updateVendorProduct(product), HttpStatus.OK);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(productService.updateVendorProduct(userId, product), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/product/vendor/activateproduct", method = RequestMethod.POST)
@@ -83,7 +85,8 @@ public class QuotationControllerProduct {
 			@RequestBody Product product) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /product/vendor/activateproduct:" + product + ")");
 		Util.checkAccessGrant(authorization, UserRole.VENDOR, product.getVendorCode());
-		return new ResponseEntity<Object>(productService.activateVendorProduct(product), HttpStatus.OK);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(productService.activateVendorProduct(userId, product), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/product/vendor/createproducts", method = RequestMethod.POST)
@@ -91,9 +94,10 @@ public class QuotationControllerProduct {
 			@RequestBody Product[] products) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /product/vendor/createproducts:" + products + ")");	
 		ArrayList<QuotationResponse> quotations = new ArrayList<QuotationResponse>();  
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
 		for(Product product : products) {
 			Util.checkAccessGrant(authorization, UserRole.VENDOR, product.getVendorCode());
-			quotations.add(productService.addVendorProduct(product));
+			quotations.add(productService.addVendorProduct(userId, product));
 		}
 		return new ResponseEntity<Object>(quotations, HttpStatus.CREATED);		
 	}

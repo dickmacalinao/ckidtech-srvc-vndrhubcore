@@ -50,7 +50,8 @@ public class QuotationControllerAppUser {
 			@RequestBody AppUser appUser) throws Exception {
 		LOG.log(Level.INFO, "Calling API /appuser/admin/createappuser:" + appUser + ")");
 		Util.checkAccessGrant(authorization, UserRole.ADMIN, null);
-		return new ResponseEntity<Object>(appUserService.addAppUser(appUser), HttpStatus.CREATED);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(appUserService.addAppUser(userId, appUser), HttpStatus.CREATED);		
 	}	
 	
 	@RequestMapping(value = "/appuser/admin/updateappuser", method = RequestMethod.POST)
@@ -58,7 +59,8 @@ public class QuotationControllerAppUser {
 			@RequestBody AppUser appUser) throws Exception {
 		LOG.log(Level.INFO, "Calling API /appuser/admin/updateappuser:" + appUser + ")");			
 		Util.checkAccessGrant(authorization, UserRole.ADMIN, null);
-		return new ResponseEntity<Object>(appUserService.updateAppUser(appUser), HttpStatus.OK);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(appUserService.updateAppUser(userId, appUser), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/appuser/admin/deleteappuser/{appuserid}")
@@ -74,7 +76,8 @@ public class QuotationControllerAppUser {
 			@PathVariable("appuserid") String appuserid) throws Exception {
 		LOG.log(Level.INFO, "Calling API /appuser/admin/activateappuser:" + appuserid + ")");	
 		Util.checkAccessGrant(authorization, UserRole.ADMIN, null);
-		return new ResponseEntity<Object>(appUserService.activateAppUser(UserRole.ADMIN, null, appuserid), HttpStatus.OK);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(appUserService.activateAppUser(UserRole.ADMIN, null, userId, appuserid), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/appuser/admin/deactivateappuser/{appuserid}")
@@ -82,7 +85,8 @@ public class QuotationControllerAppUser {
 			@PathVariable("appuserid") String appuserid) throws Exception {
 		LOG.log(Level.INFO, "Calling API /appuser/admin/deactivateappuser:" + appuserid + ")");	
 		Util.checkAccessGrant(authorization, UserRole.ADMIN, null);
-		return new ResponseEntity<Object>(appUserService.deActivateAppUser(UserRole.ADMIN, null, appuserid), HttpStatus.OK);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(appUserService.deActivateAppUser(UserRole.ADMIN, null, userId, appuserid), HttpStatus.OK);		
 	}
 	
 	// Vendor Services
@@ -109,7 +113,8 @@ public class QuotationControllerAppUser {
 			@RequestBody AppUser appUser) throws Exception {
 		LOG.log(Level.INFO, "Calling API /appuser/admin/createappuser:" + appUser + ")");		
 		Util.checkAccessGrant(authorization, UserRole.VENDOR, appUser.getVendor());
-		return new ResponseEntity<Object>(appUserService.addAppUser(appUser), HttpStatus.CREATED);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(appUserService.addAppUser(userId, appUser), HttpStatus.CREATED);		
 	}	
 	
 	@RequestMapping(value = "/appuser/vendor/updateappuser", method = RequestMethod.POST)
@@ -117,7 +122,8 @@ public class QuotationControllerAppUser {
 			@RequestBody AppUser appUser) throws Exception {
 		LOG.log(Level.INFO, "Calling API /appuser/vendor/updateappuser:" + appUser + ")");	
 		Util.checkAccessGrant(authorization, UserRole.VENDOR, appUser.getVendor());
-		return new ResponseEntity<Object>(appUserService.updateAppUser(appUser), HttpStatus.OK);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(appUserService.updateAppUser(userId, appUser), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/appuser/vendor/deleteappuser/{appuserid}")
@@ -135,7 +141,8 @@ public class QuotationControllerAppUser {
 		LOG.log(Level.INFO, "Calling API /appuser/vendor/activateappuser:" + appuserid + ")");
 		Util.checkAccessGrant(authorization, UserRole.VENDOR, null);
 		String vendorId = (String) Util.getClaimsValueFromToken(authorization, "vendor");
-		return new ResponseEntity<Object>(appUserService.activateAppUser(UserRole.VENDOR, vendorId, appuserid), HttpStatus.OK);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(appUserService.activateAppUser(UserRole.VENDOR, vendorId, userId, appuserid), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/appuser/vendor/deactivateappuser/{appuserid}")
@@ -144,7 +151,8 @@ public class QuotationControllerAppUser {
 		LOG.log(Level.INFO, "Calling API /appuser/vendor/deactivateappuser:" + appuserid + ")");
 		Util.checkAccessGrant(authorization, UserRole.VENDOR, null);
 		String vendorId = (String) Util.getClaimsValueFromToken(authorization, "vendor");
-		return new ResponseEntity<Object>(appUserService.deActivateAppUser(UserRole.VENDOR, vendorId,appuserid), HttpStatus.OK);		
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(appUserService.deActivateAppUser(UserRole.VENDOR, vendorId, userId, appuserid), HttpStatus.OK);		
 	}
 			
 }
