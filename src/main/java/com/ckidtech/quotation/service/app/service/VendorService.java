@@ -302,7 +302,7 @@ public class VendorService {
 					vendorRep.setActiveIndicator(false);
 					Util.initalizeUpdatedInfo(vendorRep, msgController.getMsg("info.VRDA"));
 					
-					appUserService.deActivateAllAppUser(vendorCode); // Deactivate all users under that vemdor
+					appUserService.deActivateAllAppUser(vendorCode); // Deactivate all users under that vendor
 					
 					vendorRepository.save(vendorRep);
 					quotation.addMessage(msgController.createMsg("info.VRDA"));

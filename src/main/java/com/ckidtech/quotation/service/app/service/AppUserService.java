@@ -17,6 +17,7 @@ import com.ckidtech.quotation.service.core.controller.MessageController;
 import com.ckidtech.quotation.service.core.controller.QuotationResponse;
 import com.ckidtech.quotation.service.core.dao.AppUserRepository;
 import com.ckidtech.quotation.service.core.dao.VendorRepository;
+import com.ckidtech.quotation.service.core.exception.ServiceAccessResourceFailureException;
 import com.ckidtech.quotation.service.core.model.AppUser;
 import com.ckidtech.quotation.service.core.model.Vendor;
 import com.ckidtech.quotation.service.core.security.UserRole;
@@ -211,12 +212,7 @@ public class AppUserService {
 			
 	}
 	
-	/**
-	 * Delete ASapp User
-	 * @param appUserId
-	 * @return
-	 */
-	public QuotationResponse deleteAppUser(String appUserId) {
+	public QuotationResponse deleteAppUser(UserRole role, String vendorId, String appUserId) {
 		LOG.log(Level.INFO, "Calling AppUser Service deleteAppUser()");
 
 		QuotationResponse quotation = new QuotationResponse();
@@ -230,7 +226,12 @@ public class AppUserService {
 
 			if (appUserRep == null) {
 				quotation.addMessage(msgController.createMsg("error.AUNFE"));
-			} else {				
+			} else {
+				
+				if ( UserRole.VENDOR.equals(role) && vendorId!=null && !vendorId.equals(appUserRep.getVendor()) ) {
+					throw new ServiceAccessResourceFailureException();
+				}
+			
 				appUserRepository.delete(appUserRep);
 				quotation.addMessage(msgController.createMsg("info.AURD"));
 
@@ -249,7 +250,7 @@ public class AppUserService {
 	 * @param appUserId
 	 * @return
 	 */
-	public QuotationResponse activateAppUser(String appUserId) {
+	public QuotationResponse activateAppUser(UserRole role, String vendorId, String appUserId) {
 		
 		LOG.log(Level.INFO, "Calling AppUser Service activateAppUser()");
 		
@@ -269,6 +270,11 @@ public class AppUserService {
 				if ( appUserRep.isActiveIndicator() ) {
 					quotation.addMessage(msgController.createMsg("error.AUAAE"));
 				} else {
+					
+					if ( UserRole.VENDOR.equals(role) && vendorId!=null && !vendorId.equals(appUserRep.getVendor()) ) {
+						throw new ServiceAccessResourceFailureException();
+					}
+					
 					appUserRep.setActiveIndicator(true);
 					Util.initalizeUpdatedInfo(appUserRep, msgController.getMsg("info.AURA"));
 					appUserRepository.save(appUserRep);
@@ -285,12 +291,14 @@ public class AppUserService {
 	}
 	
 	
+	
+	
 	/**
 	 * Deactivate App User
 	 * @param appUserId
 	 * @return
 	 */
-	public QuotationResponse deActivateAppUser(String appUserId) {
+	public QuotationResponse deActivateAppUser(UserRole role, String vendorId, String appUserId) {
 		
 		LOG.log(Level.INFO, "Calling AppUser Service deActivateAppUser()");
 		
@@ -310,6 +318,11 @@ public class AppUserService {
 				if ( !appUserRep.isActiveIndicator() ) {
 					quotation.addMessage(msgController.createMsg("error.AUADAE"));
 				} else {
+					
+					if ( UserRole.VENDOR.equals(role) && vendorId!=null && !vendorId.equals(appUserRep.getVendor()) ) {
+						throw new ServiceAccessResourceFailureException();
+					}
+					
 					appUserRep.setActiveIndicator(false);
 					Util.initalizeUpdatedInfo(appUserRep, msgController.getMsg("info.AURDA"));
 					appUserRepository.save(appUserRep);
@@ -331,7 +344,7 @@ public class AppUserService {
 		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "name");
 		List<AppUser> listAppUser = appUserRepository.vendorFindAllAppUsers(vendor, pageable);
 		for(AppUser appUser : listAppUser) {
-			deActivateAppUser(appUser.getId());
+			deActivateAppUser(UserRole.ADMIN, null, appUser.getId());
 		}
 
 	}
@@ -342,8 +355,9 @@ public class AppUserService {
 		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "name");
 		List<AppUser> listAppUser = appUserRepository.vendorFindAllAppUsers(vendor, pageable);
 		for(AppUser appUser : listAppUser) {
-			deleteAppUser(appUser.getId());
+			deleteAppUser(UserRole.ADMIN, null, appUser.getId());
 		}
 
-	}
+}
+	
 }

@@ -18,10 +18,12 @@ import com.ckidtech.quotation.service.core.controller.QuotationResponse;
 import com.ckidtech.quotation.service.core.dao.ProductRepository;
 import com.ckidtech.quotation.service.core.dao.ReferenceDataRepository;
 import com.ckidtech.quotation.service.core.dao.VendorRepository;
+import com.ckidtech.quotation.service.core.exception.ServiceAccessResourceFailureException;
 import com.ckidtech.quotation.service.core.model.Product;
 import com.ckidtech.quotation.service.core.model.ProductGroup;
 import com.ckidtech.quotation.service.core.model.ReferenceData;
 import com.ckidtech.quotation.service.core.model.Vendor;
+import com.ckidtech.quotation.service.core.security.UserRole;
 import com.ckidtech.quotation.service.core.utils.Util;
 
 @ComponentScan({"com.ckidtech.quotation.service.core.controller"})
@@ -46,10 +48,8 @@ public class ProductService {
 	
 	public QuotationResponse listProducts(String vendorCode, boolean flag) {	
 		
-		LOG.log(Level.INFO, "Calling Vendor Service viewAllProducts()");
+		LOG.log(Level.INFO, "Calling Vendor Service viewAllProducts(" + vendorCode + "," + flag +")");
 		QuotationResponse quotation = new QuotationResponse();	
-		
-		// TODO: Verify that the session vendor id is same with the vendor id from json
 		
 		Vendor vendor = vendorRepository.findById(vendorCode).orElse(null);
 		if ( vendor==null || !vendor.isActiveIndicator() ) {
@@ -64,10 +64,8 @@ public class ProductService {
 	
 	public QuotationResponse listProductsByGroup(String vendorCode, boolean flag) {
 		
-		LOG.log(Level.INFO, "Calling Vendor Service viewAllProducts()");
+		LOG.log(Level.INFO, "Calling Vendor Service viewAllProducts(" + vendorCode + "," + flag + ")");
 		QuotationResponse quotation = new QuotationResponse();
-		
-		// TODO: Verify that the session vendor id is same with the vendor id from json
 		
 		Vendor vendor = vendorRepository.findById(vendorCode).orElse(null);
 		if ( vendor==null || !vendor.isActiveIndicator() ) {
@@ -103,8 +101,6 @@ public class ProductService {
 		LOG.log(Level.INFO, "Calling Vendor Service findByProductName()");
 		QuotationResponse quotation = new QuotationResponse();	
 		
-		// TODO: Verify that the session vendor id is same with the vendor id from json
-		
 		Vendor vendor = vendorRepository.findById(vendorCode).orElse(null);
 		if ( vendor==null || !vendor.isActiveIndicator() ) {
 			quotation.addMessage(msgController.createMsg("error.VNFE"));
@@ -125,8 +121,6 @@ public class ProductService {
 		LOG.log(Level.INFO, "Calling Product Service addProduct()");
 		
 		QuotationResponse quotation = new QuotationResponse();
-		
-		// TODO: Verify that the session vendor id is same with the vendor id from json
 		
 		if ( product.getId()==null || "".equals(product.getId()) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product Code"));	
@@ -181,8 +175,6 @@ public class ProductService {
 		
 		QuotationResponse quotation = new QuotationResponse();
 		
-		// TODO: Verify that the session vendor id is same with the vendor id from json
-		
 		if ( product.getId()==null || "".equals(product.getId()) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product Code"));	
 		if ( product.getGroup()==null || "".equals(product.getGroup()) ) 
@@ -235,8 +227,6 @@ public class ProductService {
 		
 		QuotationResponse quotation = new QuotationResponse();
 		
-		// TODO: Verify that the session vendor id is same with the vendor id from json
-		
 		if ( product.getId()==null || "".equals(product.getId()) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product Code"));	
 		if ( product.getVendorCode()==null || "".equals(product.getVendorCode()) ) 
@@ -272,7 +262,7 @@ public class ProductService {
 	 * @param productCode
 	 * @return
 	 */
-	public QuotationResponse deleteVendorProduct(String productCode) {		
+	public QuotationResponse deleteVendorProduct(UserRole role, String vendorId, String productCode) {		
 		LOG.log(Level.INFO, "Calling Vendor Service deleteVendorProduct()");	
 		
 		QuotationResponse quotation = new QuotationResponse();
@@ -288,6 +278,11 @@ public class ProductService {
 				quotation.addMessage(msgController.createMsg("error.VPNFE"));
 			} else {
 				if ( productRep.isActiveIndicator() ) { 
+					
+					if ( UserRole.VENDOR.equals(role) && vendorId!=null && !vendorId.equals(productRep.getVendorCode()) ) {
+						throw new ServiceAccessResourceFailureException();
+					}
+					
 					productRep.setActiveIndicator(false);
 					Util.initalizeUpdatedInfo(productRep, msgController.getMsg("info.VPRD"));				
 					productRepository.save(productRep);
@@ -315,13 +310,13 @@ public class ProductService {
 		// Delete active products
 		QuotationResponse quotation = listProducts(vendorCode, true);		
 		for (Product product : quotation.getProducts() ) {
-			deleteVendorProduct(product.getId());
+			deleteVendorProduct(UserRole.VENDOR, product.getVendorCode(), product.getId());
 		}
 		
 		// Delete inactive products
 		quotation = listProducts(vendorCode, false);		
 		for (Product product : quotation.getProducts() ) {
-			deleteVendorProduct(product.getId());
+			deleteVendorProduct(UserRole.VENDOR, product.getVendorCode(), product.getId());
 		}
 		
 	}
