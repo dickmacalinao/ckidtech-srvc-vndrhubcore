@@ -75,7 +75,9 @@ public class VendorServiceTest {
 
 	@Test
 	public void addVendorTest() {			
-		vendorService.addVendor(ADMIN_USER, new Vendor("TEST", "Test Vendor", "Address", "9999999999", "imagelink"));
+		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("TEST", "Test Vendor", "Address", "9999999999", "imagelink"));
+		
+		assertEquals("Vendor record created.", response.getMessages().get(0).getMessage());
 		
 		List<Vendor> allVendors = vendorService.viewAllVendors();
 		assertEquals(1, allVendors.size());
@@ -119,6 +121,13 @@ public class VendorServiceTest {
 	}
 	
 	@Test
+	public void updateVendorButNoVendorFoundTest() {
+		
+		QuotationResponse response = vendorService.updateVendor(ADMIN_USER, new Vendor("TEST2", "Test Vendor New", "Address New", "9999999999 New", "imagelink New"));		
+		assertEquals("Vendor not found.", response.getMessages().get(0).getMessage());
+	}
+	
+	@Test
 	public void deleteVendorTest() {			
 		vendorService.addVendor(ADMIN_USER, new Vendor("TEST", "Test Vendor", "Address", "9999999999", "imagelink"));
 		
@@ -129,6 +138,13 @@ public class VendorServiceTest {
 		
 		List<Vendor> allVendors2 = vendorService.viewAllVendors();
 		assertEquals(0, allVendors2.size());
+	}
+	
+	@Test
+	public void deleteVendorButNoVendorFoundTest() {	
+		
+		QuotationResponse response = vendorService.deleteVendor("TEST2");
+		assertEquals("Vendor not found.", response.getMessages().get(0).getMessage());
 	}
 	
 	@Test
