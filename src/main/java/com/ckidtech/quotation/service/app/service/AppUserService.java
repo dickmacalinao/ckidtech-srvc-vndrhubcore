@@ -39,6 +39,11 @@ public class AppUserService {
 	@Autowired
 	private MessageController msgController;
 	
+	public AppUser getAppUserById(String id) {
+		LOG.log(Level.INFO, "Calling Vendor Service getAppUserById()");
+		return appUserRepository.findById(id).orElse(null);
+	}
+	
 	/**
 	 * View all AppUser records
 	 * 
@@ -120,14 +125,16 @@ public class AppUserService {
 		if( quotation.getMessages().isEmpty() ) {
 			
 			appUser.setUsername(appUser.getUsername().toUpperCase());
-		
-			Vendor vendorRep = vendorRepository.findById(appUser.getVendor().toUpperCase()).orElse(null);
 			
 			// Verify if vendor exists and active
-			if ( !UserRole.ADMIN.toString().equalsIgnoreCase(appUser.getRole()) && 
-					(vendorRep==null || !vendorRep.isActiveIndicator() )) {
-				quotation.addMessage(msgController.createMsg("error.VNFE"));
-			} else {
+			if ( !UserRole.ADMIN.toString().equalsIgnoreCase(appUser.getRole()) ) {				
+				Vendor vendorRep = vendorRepository.findById(appUser.getVendor().toUpperCase()).orElse(null);
+				if (vendorRep==null || !vendorRep.isActiveIndicator() ) {
+					quotation.addMessage(msgController.createMsg("error.VNFE"));
+				}
+			}
+			
+			if( quotation.getMessages().isEmpty() ) {
 				
 				AppUser appUserRep = appUserRepository.findById(appUser.getUsername()).orElse(null);
 				
@@ -135,7 +142,7 @@ public class AppUserService {
 					quotation.addMessage(msgController.createMsg("error.AUAEE"));	
 				} else {
 					appUser.setPassword(encoder.encode(appUser.getPassword())); //encode password
-					appUser.setVendor(appUser.getVendor().toUpperCase());
+					appUser.setVendor( appUser.getVendor()!=null ? appUser.getVendor().toUpperCase() : null);
 					appUser.setRole(appUser.getRole().toUpperCase());
 					appUser.setActiveIndicator(false);
 					Util.initalizeCreatedInfo(appUser, userId, msgController.getMsg("info.AURC"));					
@@ -205,6 +212,8 @@ public class AppUserService {
 				appUserRep.setPassword("[Protected]");
 				quotation.setAppUser(appUserRep);	
 				
+				quotation.addMessage(msgController.createMsg("info.AURU"));
+				
 			}
 		}
 		
@@ -234,10 +243,9 @@ public class AppUserService {
 			
 				appUserRepository.delete(appUserRep);
 				quotation.addMessage(msgController.createMsg("info.AURD"));
-
+				appUserRep.setPassword("[Protected]");
 			}
 			
-			appUserRep.setPassword("[Protected]");
 			quotation.setAppUser(appUserRep);
 
 		}
@@ -358,6 +366,21 @@ public class AppUserService {
 			deleteAppUser(UserRole.ADMIN, null, appUser.getId());
 		}
 
-}
+	}
+	
+	/**
+	 * Delete all appuser records Should not be called
+	 */
+	public QuotationResponse deleteAllAppUser() {
+
+		LOG.log(Level.INFO, "Calling Vendor Service deleteAllAppUser()");
+		QuotationResponse quotation = new QuotationResponse();
+		appUserRepository.deleteAll();
+		quotation.addMessage(msgController.createMsg("info.AAUSD"));
+		return quotation;
+
+	}
+	
+	
 	
 }

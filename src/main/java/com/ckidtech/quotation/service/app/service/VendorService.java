@@ -107,23 +107,9 @@ public class VendorService {
 
 			Vendor vendorRep = vendorRepository.findById(vendor.getId()).orElse(null);
 
-			if (vendorRep != null) {
-
-				if (vendorRep.isActiveIndicator())
-					quotation.addMessage(msgController.createMsg("error.VAEE"));
-				else {					
-					vendorRep.setName(vendor.getName());
-					vendorRep.setAddress(vendor.getAddress());
-					vendorRep.setContactNo(vendor.getContactNo());
-					vendorRep.setImgLocation(vendor.getImgLocation());
-					vendorRep.setActiveIndicator(false);
-					Util.initalizeUpdatedInfo(vendorRep, userId, msgController.getMsg("info.VRR"));
-					vendorRepository.save(vendorRep);
-					quotation.addMessage(msgController.createMsg("info.VRR"));
-				}
-
+			if (vendorRep != null) {				
+				quotation.addMessage(msgController.createMsg("error.VAEE"));
 				quotation.setVendor(vendorRep);
-
 			} else {
 				Util.initalizeCreatedInfo(vendor, userId, msgController.getMsg("info.VRC"));
 				vendor.setActiveIndicator(false);
