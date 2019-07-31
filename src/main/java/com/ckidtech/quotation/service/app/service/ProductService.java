@@ -284,6 +284,7 @@ public class ProductService {
 					}
 					
 					productRepository.delete(productRep);
+					quotation.addMessage(msgController.createMsg("info.VPRD"));
 				} else {
 					quotation.addMessage(msgController.createMsg("error.VPADE"));
 				}
