@@ -204,6 +204,8 @@ public class ProductService {
 						productRep.setName(product.getName());
 						productRep.setGroup(product.getGroup());
 						productRep.setImgLocation(product.getImgLocation());
+						productRep.setProdComp(product.getProdComp());
+						
 						Util.initalizeUpdatedInfo(productRep, userId, msgController.getMsg("info.VPRU"));
 						productRepository.save(productRep);
 						quotation.addMessage(msgController.createMsg("info.VPRU"));
