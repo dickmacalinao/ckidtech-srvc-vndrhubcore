@@ -141,19 +141,10 @@ public class ProductService {
 				Product productRep = productRepository.findById(product.getId()).orElse(null);
 				
 				if  ( productRep!=null ) {
-					
-					if ( productRep.isActiveIndicator() ) {
-						quotation.addMessage(msgController.createMsg("error.VPAEE"));
-					} else {
-						productRep.setActiveIndicator(true);
-						Util.initalizeUpdatedInfo(productRep, userId, msgController.getMsg("info.VPRR"));
-						productRepository.save(productRep);
-						quotation.addMessage(msgController.createMsg("info.VPRR"));
-						quotation.setProduct(productRep);
-					}
-						
+					quotation.addMessage(msgController.createMsg("error.VPAEE"));						
 				} else {
 					Util.initalizeCreatedInfo(product, userId, msgController.getMsg("info.VPRC"));
+					product.setActiveIndicator(false);
 					productRepository.save(product);					
 					quotation.addMessage(msgController.createMsg("info.VPRC"));
 					quotation.setProduct(product);
@@ -196,21 +187,17 @@ public class ProductService {
 				if  ( productRep==null ) {
 					quotation.addMessage(msgController.createMsg("error.VPNFE"));
 				} else {	
-					
-					if ( !productRep.isActiveIndicator() ) {
-						quotation.addMessage(msgController.createMsg("error.VPNFE"));
-					} else {
-						productRep.setActiveIndicator(true);
-						productRep.setName(product.getName());
-						productRep.setGroup(product.getGroup());
-						productRep.setImgLocation(product.getImgLocation());
-						productRep.setProdComp(product.getProdComp());
 						
-						Util.initalizeUpdatedInfo(productRep, userId, msgController.getMsg("info.VPRU"));
-						productRepository.save(productRep);
-						quotation.addMessage(msgController.createMsg("info.VPRU"));
-						quotation.setProduct(productRep);
-					}						
+					productRep.setName(product.getName());
+					productRep.setGroup(product.getGroup());
+					productRep.setImgLocation(product.getImgLocation());
+					productRep.setProdComp(product.getProdComp());
+					
+					Util.initalizeUpdatedInfo(productRep, userId, msgController.getMsg("info.VPRU"));
+					productRepository.save(productRep);
+					quotation.addMessage(msgController.createMsg("info.VPRU"));
+					quotation.setProduct(productRep);
+											
 				} 	
 			}
 		}
