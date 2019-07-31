@@ -1,6 +1,7 @@
 package com.ckidtech.quotation.service.app.test.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
@@ -15,7 +16,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.ckidtech.quotation.service.app.service.AppUserService;
 import com.ckidtech.quotation.service.app.service.VendorService;
+import com.ckidtech.quotation.service.core.controller.QuotationResponse;
 import com.ckidtech.quotation.service.core.model.AppUser;
+import com.ckidtech.quotation.service.core.model.ReturnMessage;
 import com.ckidtech.quotation.service.core.model.Vendor;
 import com.ckidtech.quotation.service.core.security.UserRole;
 
@@ -107,9 +110,9 @@ public class AppUserServiceTest {
 	}
 	
 	@Test
-	public void addAppUserTest() {
-		
-		appUserService.addAppUser(ADMIN_USER, new AppUser(TEST_VENDOR1 + "_ADMIN", "Vendor Admin", "password", TEST_VENDOR1, "VENDOR"));
+	public void addAppUserSuccessfulTest() {		
+		QuotationResponse response = appUserService.addAppUser(ADMIN_USER, new AppUser(TEST_VENDOR1 + "_ADMIN", "Vendor Admin", "password", TEST_VENDOR1, "VENDOR"));
+		assertTrue("App User record created.", response.getMessages().contains(new ReturnMessage("App User record created.", ReturnMessage.MessageTypeEnum.INFO)));
 		
 		AppUser appUser = appUserService.getAppUserById(TEST_VENDOR1 + "_ADMIN");
 		assertEquals(TEST_VENDOR1 + "_ADMIN", appUser.getId());
@@ -120,11 +123,35 @@ public class AppUserServiceTest {
 	}
 	
 	@Test
-	public void updateAppUserTest() {
+	public void addAppUserWithDuplicateTest() {		
+		addAppUserSuccessfulTest();		
+		QuotationResponse response = appUserService.addAppUser(ADMIN_USER, new AppUser(TEST_VENDOR1 + "_ADMIN", "Vendor Admin", "password", TEST_VENDOR1, "VENDOR"));		
+		assertTrue("App User already exists.", response.getMessages().contains(new ReturnMessage("App User already exists.", ReturnMessage.MessageTypeEnum.ERROR)));		
+	}
+	
+	@Test
+	public void addAppUserWithMissingMandatoryFieldsTest() {		
+		QuotationResponse response = appUserService.addAppUser(ADMIN_USER, new AppUser("", "", "", "", ""));		
+		assertTrue("User Name is required.", response.getMessages().contains(new ReturnMessage("User Name is required.", ReturnMessage.MessageTypeEnum.ERROR)));
+		assertTrue("Password is required.", response.getMessages().contains(new ReturnMessage("Password is required.", ReturnMessage.MessageTypeEnum.ERROR)));
+		assertTrue("Name is required.", response.getMessages().contains(new ReturnMessage("Name is required.", ReturnMessage.MessageTypeEnum.ERROR)));
+		assertTrue("Role is required.", response.getMessages().contains(new ReturnMessage("Role is required.", ReturnMessage.MessageTypeEnum.ERROR)));		
+	}
+	
+	@Test
+	public void addAppUserWithMissingMandatoryVendorCodeTest() {		
+		QuotationResponse response = appUserService.addAppUser(ADMIN_USER, new AppUser(TEST_VENDOR1 + "_ADMIN", "Vendor Admin", "password", "", "VENDOR"));		
+		assertTrue("Vendor Code is required.", response.getMessages().contains(new ReturnMessage("Vendor Code is required.", ReturnMessage.MessageTypeEnum.ERROR)));
+	}
+	
+	
+	@Test
+	public void updateAppUserSuccessfulTest() {
 		
-		addAppUserTest();
+		addAppUserSuccessfulTest();
 		
-		appUserService.updateAppUser(ADMIN_USER, new AppUser(TEST_VENDOR1 + "_ADMIN", "Vendor Admin New", "password", TEST_VENDOR2, "USER"));
+		QuotationResponse response = appUserService.updateAppUser(ADMIN_USER, new AppUser(TEST_VENDOR1 + "_ADMIN", "Vendor Admin New", "password", TEST_VENDOR2, "USER"));
+		assertTrue("App User record updated.", response.getMessages().contains(new ReturnMessage("App User record updated.", ReturnMessage.MessageTypeEnum.INFO)));
 		
 		AppUser appUser = appUserService.getAppUserById(TEST_VENDOR1 + "_ADMIN");
 		assertEquals(TEST_VENDOR1 + "_ADMIN", appUser.getId());
@@ -135,7 +162,15 @@ public class AppUserServiceTest {
 	}
 	
 	@Test
-	public void deleteAppUserTest() {
+	public void updateAppUseruserNotFoundTest() {
+		
+		QuotationResponse response = appUserService.updateAppUser(ADMIN_USER, new AppUser(TEST_VENDOR1 + "_ADMIN", "Vendor Admin New", "password", TEST_VENDOR2, "USER"));
+		assertTrue("App User not found.", response.getMessages().contains(new ReturnMessage("App User not found.", ReturnMessage.MessageTypeEnum.ERROR)));
+		
+	}
+	
+	@Test
+	public void deleteAppUserSuccessfulTest() {
 		
 		appUserService.addAppUser(ADMIN_USER, new AppUser(TEST_VENDOR1 + "_USER", "Vendor User", "password", TEST_VENDOR1, "USER"));
 		appUserService.addAppUser(ADMIN_USER, new AppUser(TEST_VENDOR2 + "_USER1", "Vendor User 1", "password", TEST_VENDOR2, "USER"));
@@ -154,7 +189,7 @@ public class AppUserServiceTest {
 	}
 	
 	@Test
-	public void activateAppUserTest() {
+	public void activateAppUserSucessfulTest() {
 		appUserService.addAppUser(ADMIN_USER, new AppUser(TEST_VENDOR1 + "_USER", "Vendor User", "password", TEST_VENDOR1, "USER"));
 		
 		AppUser appUser = appUserService.getAppUserById(TEST_VENDOR1 + "_USER");
@@ -168,9 +203,9 @@ public class AppUserServiceTest {
 	}
 	
 	@Test
-	public void deActivateAppUserTest() {
+	public void deActivateAppUserSuccessfulTest() {
 		
-		activateAppUserTest();
+		activateAppUserSucessfulTest();
 		
 		appUserService.deActivateAppUser(UserRole.VENDOR, TEST_VENDOR1, ADMIN_USER, TEST_VENDOR1 + "_USER");
 		
@@ -180,7 +215,7 @@ public class AppUserServiceTest {
 	}
 	
 	@Test
-	public void deActivateAllAppUserTest() {
+	public void deActivateAllAppUserToOneVendorOnlyTest() {
 		
 		appUserService.addAppUser(ADMIN_USER, new AppUser(TEST_VENDOR1 + "_USER", "Vendor User", "password", TEST_VENDOR1, "USER"));
 		appUserService.addAppUser(ADMIN_USER, new AppUser(TEST_VENDOR2 + "_USER", "Vendor User", "password", TEST_VENDOR2, "USER"));

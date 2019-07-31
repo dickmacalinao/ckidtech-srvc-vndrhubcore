@@ -186,7 +186,21 @@ public class VendorServiceTest {
 	}
 	
 	@Test
-	public void deActivateVendorTest() {				
+	public void activateVendorVendorNotFoundTest() {				
+		QuotationResponse response = vendorService.activateVendor(ADMIN_USER, "TEST");
+		assertTrue("Vendor not found.", response.getMessages().contains(new ReturnMessage("Vendor not found.", ReturnMessage.MessageTypeEnum.ERROR)));		
+	}
+	
+	@Test
+	public void activateVendorVendorAlreadyActiveTest() {
+		
+		activateVendorSuccessfulTest();
+		QuotationResponse response = vendorService.activateVendor(ADMIN_USER, "TEST");
+		assertTrue("Vendor not found.", response.getMessages().contains(new ReturnMessage("Vendor is already active.", ReturnMessage.MessageTypeEnum.ERROR)));		
+	}
+	
+	@Test
+	public void deActivateVendorSuccessulTest() {				
 		vendorService.addVendor(ADMIN_USER, new Vendor("TEST", "Test Vendor", "Address", "9999999999", "imagelink"));
 		
 		Vendor vendor = vendorService.getVendorById("TEST");		
@@ -201,6 +215,18 @@ public class VendorServiceTest {
 		
 		vendor = vendorService.getVendorById("TEST");
 		assertEquals(false, vendor.isActiveIndicator());
+	}
+	
+	
+	public void deActivateVendorVendorNotFoundTest() {						
+		QuotationResponse response = vendorService.deActivateVendor(ADMIN_USER, "TEST");		
+		assertTrue("Vendor not found.", response.getMessages().contains(new ReturnMessage("Vendor not found.", ReturnMessage.MessageTypeEnum.ERROR)));
+	}
+	
+	public void deActivateVendorVendorAlreadyDeactivatedTest() {
+		deActivateVendorSuccessulTest();		
+		QuotationResponse response = vendorService.deActivateVendor(ADMIN_USER, "TEST");		
+		assertTrue("Vendor is already deactivated.", response.getMessages().contains(new ReturnMessage("Vendor is already deactivated..", ReturnMessage.MessageTypeEnum.ERROR)));
 	}
 	
 }
