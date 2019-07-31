@@ -80,13 +80,24 @@ public class QuotationControllerProduct {
 		return new ResponseEntity<Object>(productService.updateVendorProduct(userId, product), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/product/vendor/activateproduct", method = RequestMethod.POST)
+	@RequestMapping(value = "/product/vendor/activateproduct/{productId}", method = RequestMethod.POST)
 	public ResponseEntity<Object> activateProduct(@RequestHeader("authorization") String authorization,
-			@RequestBody Product product) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/activateproduct:" + product + ")");
-		Util.checkAccessGrant(authorization, UserRole.VENDOR, product.getVendorCode());
+			@PathVariable("productId") String productId) throws Exception {		
+		LOG.log(Level.INFO, "Calling API /product/vendor/activateproduct/" + productId + ")");
+		Util.checkAccessGrant(authorization, UserRole.VENDOR, null);
+		String vendorId = (String) Util.getClaimsValueFromToken(authorization, "vendor");
 		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
-		return new ResponseEntity<Object>(productService.activateVendorProduct(userId, product), HttpStatus.OK);		
+		return new ResponseEntity<Object>(productService.activateVendorProduct(vendorId, userId, productId), HttpStatus.OK);		
+	}
+	
+	@RequestMapping(value = "/product/vendor/deactivateproduct/{productId}", method = RequestMethod.POST)
+	public ResponseEntity<Object> deActivateProduct(@RequestHeader("authorization") String authorization,
+			@PathVariable("productId") String productId) throws Exception {		
+		LOG.log(Level.INFO, "Calling API /product/vendor/deactivateproduct/" + productId + ")");
+		Util.checkAccessGrant(authorization, UserRole.VENDOR, null);
+		String vendorId = (String) Util.getClaimsValueFromToken(authorization, "vendor");
+		String userId = (String) Util.getClaimsValueFromToken(authorization, "sub");
+		return new ResponseEntity<Object>(productService.deActivateVendorProduct(vendorId, userId, productId), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/product/vendor/createproducts", method = RequestMethod.POST)
@@ -102,13 +113,13 @@ public class QuotationControllerProduct {
 		return new ResponseEntity<Object>(quotations, HttpStatus.CREATED);		
 	}
 		
-	@RequestMapping(value = "/product/vendor/deletevendorproduct/{productCode}")
+	@RequestMapping(value = "/product/vendor/deletevendorproduct/{productId}")
 	public ResponseEntity<Object> deleteVendorProduct(@RequestHeader("authorization") String authorization,
-			@PathVariable("productCode") String productCode) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/deletevendorproduct/" + productCode);
+			@PathVariable("productId") String productId) throws Exception {		
+		LOG.log(Level.INFO, "Calling API /product/vendor/deletevendorproduct/" + productId);
 		Util.checkAccessGrant(authorization, UserRole.VENDOR, null);
 		String vendorId = (String) Util.getClaimsValueFromToken(authorization, "vendor");
-		return new ResponseEntity<Object>(productService.deleteVendorProduct(UserRole.VENDOR, vendorId, productCode), HttpStatus.OK);		
+		return new ResponseEntity<Object>(productService.deleteVendorProduct(UserRole.VENDOR, vendorId, productId), HttpStatus.OK);		
 	}
 	
 }

@@ -48,7 +48,7 @@ public class ProductService {
 	
 	public QuotationResponse listProducts(String vendorCode, boolean flag) {	
 		
-		LOG.log(Level.INFO, "Calling Vendor Service viewAllProducts(" + vendorCode + "," + flag +")");
+		LOG.log(Level.INFO, "Calling Vendor Service listProducts(" + vendorCode + "," + flag +")");
 		QuotationResponse quotation = new QuotationResponse();	
 		
 		Vendor vendor = vendorRepository.findById(vendorCode).orElse(null);
@@ -64,7 +64,7 @@ public class ProductService {
 	
 	public QuotationResponse listProductsByGroup(String vendorCode, boolean flag) {
 		
-		LOG.log(Level.INFO, "Calling Vendor Service viewAllProducts(" + vendorCode + "," + flag + ")");
+		LOG.log(Level.INFO, "Calling Vendor Service listProductsByGroup(" + vendorCode + "," + flag + ")");
 		QuotationResponse quotation = new QuotationResponse();
 		
 		Vendor vendor = vendorRepository.findById(vendorCode).orElse(null);
@@ -98,7 +98,7 @@ public class ProductService {
 	
 	public QuotationResponse searchProductsByName(String vendorCode, boolean flag, String productName) {	
 		
-		LOG.log(Level.INFO, "Calling Vendor Service findByProductName()");
+		LOG.log(Level.INFO, "Calling Vendor Service searchProductsByName()");
 		QuotationResponse quotation = new QuotationResponse();	
 		
 		Vendor vendor = vendorRepository.findById(vendorCode).orElse(null);
@@ -118,7 +118,7 @@ public class ProductService {
 	 * @return
 	 */
 	public QuotationResponse addVendorProduct(String userId, Product product) {		
-		LOG.log(Level.INFO, "Calling Product Service addProduct()");
+		LOG.log(Level.INFO, "Calling Product Service addVendorProduct()");
 		
 		QuotationResponse quotation = new QuotationResponse();
 		
@@ -171,7 +171,7 @@ public class ProductService {
 	 * @return
 	 */
 	public QuotationResponse updateVendorProduct(String userId, Product product) {		
-		LOG.log(Level.INFO, "Calling Product Service updateProduct()");
+		LOG.log(Level.INFO, "Calling Product Service updateVendorProduct()");
 		
 		QuotationResponse quotation = new QuotationResponse();
 		
@@ -222,33 +222,94 @@ public class ProductService {
 	 * @param product
 	 * @return
 	 */
-	public QuotationResponse activateVendorProduct(String userId, Product product) {		
-		LOG.log(Level.INFO, "Calling Product Service updateProduct()");
+	public QuotationResponse activateVendorProduct(String vendorId, String userId, String productId) {		
+		LOG.log(Level.INFO, "Calling Product Service activateVendorProduct()");
 		
 		QuotationResponse quotation = new QuotationResponse();
-		
-		if ( product.getId()==null || "".equals(product.getId()) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "Product Code"));	
-		if ( product.getVendorCode()==null || "".equals(product.getVendorCode()) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Code"));
+
+		if ( vendorId==null || "".equals(vendorId) ) 
+			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));	
+		if ( userId==null || "".equals(userId) ) 
+			quotation.addMessage(msgController.createMsg("error.MFE", "User ID"));	
+		if ( productId==null || "".equals(productId) ) 
+			quotation.addMessage(msgController.createMsg("error.MFE", "Product ID"));
 		
 		if( quotation.getMessages().isEmpty() ) {
 		
-			Vendor vendorRep = vendorRepository.findById(product.getVendorCode()).orElse(null);
+			Vendor vendorRep = vendorRepository.findById(vendorId).orElse(null);
 			
 			if ( vendorRep==null || !vendorRep.isActiveIndicator() ) {
 				quotation.addMessage(msgController.createMsg("error.VNFE"));
 			} else {
-				Product productRep = productRepository.findById(product.getId()).orElse(null);
+				Product productRep = productRepository.findById(productId).orElse(null);
 				
 				if  ( productRep==null ) {
 					quotation.addMessage(msgController.createMsg("error.VPNFE"));
 				} else {
-					productRep.setActiveIndicator(true);						
-					Util.initalizeUpdatedInfo(productRep, userId, msgController.getMsg("info.VPRA"));
-					productRepository.save(productRep);
-					quotation.addMessage(msgController.createMsg("info.VPRA"));
-					quotation.setProduct(productRep);
+					
+					if ( vendorId!=null && !vendorId.equals(productRep.getVendorCode()) ) {
+						throw new ServiceAccessResourceFailureException();
+					}
+					
+					if ( productRep.isActiveIndicator() ) {
+						quotation.addMessage(msgController.createMsg("error.AUAAE"));
+					} else {
+						productRep.setActiveIndicator(true);						
+						Util.initalizeUpdatedInfo(productRep, userId, msgController.getMsg("info.VPRA"));
+						productRepository.save(productRep);
+						quotation.addMessage(msgController.createMsg("info.VPRA"));
+						quotation.setProduct(productRep);
+						
+					}
+					
+					
+				} 	
+			}
+		}
+		
+		return quotation;
+			
+	}
+	
+	public QuotationResponse deActivateVendorProduct(String vendorId, String userId, String productId) {		
+		LOG.log(Level.INFO, "Calling Product Service deActivateVendorProduct()");
+		
+		QuotationResponse quotation = new QuotationResponse();
+
+		if ( vendorId==null || "".equals(vendorId) ) 
+			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));	
+		if ( userId==null || "".equals(userId) ) 
+			quotation.addMessage(msgController.createMsg("error.MFE", "User ID"));	
+		if ( productId==null || "".equals(productId) ) 
+			quotation.addMessage(msgController.createMsg("error.MFE", "Product ID"));
+		
+		if( quotation.getMessages().isEmpty() ) {
+		
+			Vendor vendorRep = vendorRepository.findById(vendorId).orElse(null);
+			
+			if ( vendorRep==null || !vendorRep.isActiveIndicator() ) {
+				quotation.addMessage(msgController.createMsg("error.VNFE"));
+			} else {
+				Product productRep = productRepository.findById(productId).orElse(null);
+				
+				if  ( productRep==null ) {
+					quotation.addMessage(msgController.createMsg("error.VPNFE"));
+				} else {
+					
+					if ( vendorId!=null && !vendorId.equals(productRep.getVendorCode()) ) {
+						throw new ServiceAccessResourceFailureException();
+					}
+					
+					if ( !productRep.isActiveIndicator() ) {
+						quotation.addMessage(msgController.createMsg("error.VPADAE"));
+					} else {
+						productRep.setActiveIndicator(true);						
+						Util.initalizeUpdatedInfo(productRep, userId, msgController.getMsg("info.VPRD"));
+						productRepository.save(productRep);
+						quotation.addMessage(msgController.createMsg("info.VPRD"));
+						quotation.setProduct(productRep);						
+					}					
+					
 				} 	
 			}
 		}
