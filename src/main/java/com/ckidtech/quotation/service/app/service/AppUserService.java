@@ -39,6 +39,11 @@ public class AppUserService {
 	@Autowired
 	private MessageController msgController;
 	
+	/**
+	 * Get App User by ID
+	 * @param id
+	 * @return
+	 */
 	public AppUser getAppUserById(String id) {
 		LOG.log(Level.INFO, "Calling Vendor Service getAppUserById()");
 		return appUserRepository.findById(id).orElse(null);
@@ -61,6 +66,11 @@ public class AppUserService {
 
 	}
 	
+	/**
+	 * Use by Admin to search App User
+	 * @param name
+	 * @return
+	 */
 	public List<AppUser> adminSearchAppUsers(String name) {
 
 		LOG.log(Level.INFO, "Calling AppUser Service adminSearchAppUsers()");	
@@ -73,11 +83,19 @@ public class AppUserService {
 
 	}
 	
-	public List<AppUser> vendorFindAllAppUsers(String vendor) {
+	/**
+	 * List all App User
+	 * @param loginUser - Currently login user
+	 * @return
+	 */
+	public List<AppUser> vendorFindAllAppUsers(AppUser loginUser) {
 
 		LOG.log(Level.INFO, "Calling AppUser Service vendorFindAllAppUsers()");	
+		
+		Util.checkIfAlreadyActivated(loginUser);
+		
 		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "name");
-		List<AppUser> listAppUser = appUserRepository.vendorFindAllAppUsers(vendor, pageable);
+		List<AppUser> listAppUser = appUserRepository.vendorFindAllAppUsers(loginUser.getVendor(), pageable);
 		for(AppUser appUser : listAppUser) {
 			appUser.setPassword("[PROTECTED]");
 		}
@@ -85,11 +103,20 @@ public class AppUserService {
 
 	}
 	
-	public List<AppUser> vendorSearchAppUsers(String vendor, String name) {
+	/**
+	 * Method to search App User used by Vendor Admin
+	 * @param loginUser - Currently login user
+	 * @param name
+	 * @return
+	 */
+	public List<AppUser> vendorSearchAppUsers(AppUser loginUser, String name) {
 
-		LOG.log(Level.INFO, "Calling AppUser Service vendorSearchAppUsers()");		
+		LOG.log(Level.INFO, "Calling AppUser Service vendorSearchAppUsers()");	
+		
+		Util.checkIfAlreadyActivated(loginUser);
+		
 		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "name");
-		List<AppUser> listAppUser = appUserRepository.vendorSearchByName(vendor, name, pageable);
+		List<AppUser> listAppUser = appUserRepository.vendorSearchByName(loginUser.getVendor(), name, pageable);
 		for(AppUser appUser : listAppUser) {
 			appUser.setPassword("[PROTECTED]");
 		}
@@ -97,9 +124,17 @@ public class AppUserService {
 
 	}
 	
-	public QuotationResponse addAppUser(String userId, AppUser appUser) {		
+	/**
+	 * Create new AppUser
+	 * @param loginUser - Currently login user
+	 * @param appUser - App User object
+	 * @return
+	 */
+	public QuotationResponse addAppUser(AppUser loginUser, AppUser appUser) {		
 		
 		LOG.log(Level.INFO, "Calling AppUser Service addAppUser()");
+		
+		Util.checkIfAlreadyActivated(loginUser);
 		
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 		
@@ -111,15 +146,14 @@ public class AppUserService {
 		if ( appUser.getPassword()==null || "".equals(appUser.getPassword()) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Password"));
 		if ( appUser.getName()==null || "".equals(appUser.getName()) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "Name"));
-				
-		if ( appUser.getRole()==null || "".equals(appUser.getRole()) ) {
+			quotation.addMessage(msgController.createMsg("error.MFE", "Name"));				
+		if ( appUser.getRole()==null || "".equals(appUser.getRole()) )
 			quotation.addMessage(msgController.createMsg("error.MFE", "Role"));
-		} else {
-			if ( !UserRole.ADMIN.toString().equalsIgnoreCase(appUser.getRole()) &&
-					(appUser.getVendor()==null || "".equals(appUser.getVendor())) ) 
-				quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Code"));
+		if ( UserRole.ADMIN.toString().equals(loginUser.getRole()) ) {
+			if ( !UserRole.ADMIN.toString().equals(appUser.getRole()) && (appUser.getVendor()==null || "".equals(appUser.getVendor()) ) )  // Vendor ID is required for Vendor and User Type
+				quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));
 		}
+			
 		
 		// Proceed to creation if validation is successful
 		if( quotation.getMessages().isEmpty() ) {
@@ -129,7 +163,7 @@ public class AppUserService {
 			// Verify if vendor exists and active
 			if ( !UserRole.ADMIN.toString().equalsIgnoreCase(appUser.getRole()) ) {				
 				Vendor vendorRep = vendorRepository.findById(appUser.getVendor().toUpperCase()).orElse(null);
-				if (vendorRep==null || !vendorRep.isActiveIndicator() ) {
+				if (vendorRep==null ) {
 					quotation.addMessage(msgController.createMsg("error.VNFE"));
 				}
 			}
@@ -142,10 +176,10 @@ public class AppUserService {
 					quotation.addMessage(msgController.createMsg("error.AUAEE"));	
 				} else {
 					appUser.setPassword(encoder.encode(appUser.getPassword())); //encode password
-					appUser.setVendor( appUser.getVendor()!=null ? appUser.getVendor().toUpperCase() : null);
+					appUser.setVendor(UserRole.ADMIN.toString().equals(loginUser.getRole()) ? appUser.getVendor() : loginUser.getVendor()); // If admin user get vendor from json, else get from current user
 					appUser.setRole(appUser.getRole().toUpperCase());
 					appUser.setActiveIndicator(false);
-					Util.initalizeCreatedInfo(appUser, userId, msgController.getMsg("info.AURC"));					
+					Util.initalizeCreatedInfo(appUser, loginUser.getUsername(), msgController.getMsg("info.AURC"));					
 					appUserRepository.save(appUser);
 					
 					appUser.setPassword("[Protected]");
@@ -161,37 +195,41 @@ public class AppUserService {
 			
 	}
 	
-	public QuotationResponse updateAppUser(String userId, AppUser appUser) {		
+	/**
+	 * Update App User
+	 * @param loginUser - Currently login user
+	 * @param appUser - App User object
+	 * @return
+	 */
+	public QuotationResponse updateAppUser(AppUser loginUser, AppUser appUser) {		
 		LOG.log(Level.INFO, "Calling AppUser Service updateAppUser()");
+		
+		Util.checkIfAlreadyActivated(loginUser);
 		
 		QuotationResponse quotation = new QuotationResponse();
 		
 		// Validate mandatory fields
 		if ( appUser.getUsername()==null || "".equals(appUser.getUsername()) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "User Name"));	
-		//if ( appUser.getPassword()==null || "".equals(appUser.getPassword()) ) 
-		//	quotation.addMessage(msgController.createMsg("error.MFE", "Password"));
+			quotation.addMessage(msgController.createMsg("error.MFE", "User Name"));
 		if ( appUser.getName()==null || "".equals(appUser.getName()) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "Name"));
-				
-		if ( appUser.getRole()==null || "".equals(appUser.getRole()) ) {
+			quotation.addMessage(msgController.createMsg("error.MFE", "Name"));				
+		if ( appUser.getRole()==null || "".equals(appUser.getRole()) )
 			quotation.addMessage(msgController.createMsg("error.MFE", "Role"));
-		} else {
-			if ( !UserRole.ADMIN.toString().equalsIgnoreCase(appUser.getRole()) &&
-					(appUser.getVendor()==null || "".equals(appUser.getVendor())) ) 
-				quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Code"));
+		if ( UserRole.ADMIN.toString().equals(loginUser.getRole()) ) {
+			if ( !UserRole.ADMIN.toString().equals(appUser.getRole()) && (appUser.getVendor()==null || "".equals(appUser.getVendor()) ) )  // Vendor ID is required for Vendor and User Type
+				quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));
 		}
 		
 		// Proceed to creation if validation is successful
 		if( quotation.getMessages().isEmpty() ) {
 			
 			appUser.setUsername(appUser.getUsername().toUpperCase());
-		
-			Vendor vendorRep = vendorRepository.findById(appUser.getVendor().toUpperCase()).orElse(null);
+			
 			// Verify if vendor exists and active
-			if ( !UserRole.ADMIN.toString().equalsIgnoreCase(appUser.getRole()) && 
-					(vendorRep==null || !vendorRep.isActiveIndicator() )) {
-				quotation.addMessage(msgController.createMsg("error.VNFE"));
+			if ( !UserRole.ADMIN.toString().equalsIgnoreCase(appUser.getRole()) ) {
+				Vendor vendorRep = vendorRepository.findById(appUser.getVendor().toUpperCase()).orElse(null);
+				if ( vendorRep==null )
+					quotation.addMessage(msgController.createMsg("error.VNFE"));
 			} 
 			
 			AppUser appUserRep = appUserRepository.findById(appUser.getUsername()).orElse(null);
@@ -202,10 +240,10 @@ public class AppUserService {
 			
 			if( quotation.getMessages().isEmpty() ) {
 				
-				Util.initalizeUpdatedInfo(appUserRep, userId, appUserRep.getDifferences(appUser));	
+				Util.initalizeUpdatedInfo(appUserRep, loginUser.getUsername(), appUserRep.getDifferences(appUser));	
 				appUserRep.setActiveIndicator(appUser.isActiveIndicator());
 				appUserRep.setName(appUser.getName());
-				appUserRep.setVendor(appUser.getVendor().toUpperCase());
+				appUserRep.setVendor(UserRole.ADMIN.toString().equals(loginUser.getRole()) ? appUser.getVendor() : loginUser.getVendor()); // Vendor ID is required for Vendor and User Type
 				appUserRep.setRole(appUser.getRole().toUpperCase());									
 				appUserRepository.save(appUserRep);
 				
@@ -221,9 +259,17 @@ public class AppUserService {
 			
 	}
 	
-	public QuotationResponse deleteAppUser(UserRole role, String vendorId, String appUserId) {
+	/**
+	 * Delete App User
+	 * @param loginUser - Currently login user
+	 * @param appUserId - App User ID
+	 * @return
+	 */
+	public QuotationResponse deleteAppUser(AppUser loginUser, String appUserId) {
 		LOG.log(Level.INFO, "Calling AppUser Service deleteAppUser()");
 
+		Util.checkIfAlreadyActivated(loginUser);
+		
 		QuotationResponse quotation = new QuotationResponse();
 
 		if (appUserId == null || "".equals(appUserId))
@@ -237,7 +283,7 @@ public class AppUserService {
 				quotation.addMessage(msgController.createMsg("error.AUNFE"));
 			} else {
 				
-				if ( UserRole.VENDOR.equals(role) && vendorId!=null && !vendorId.equals(appUserRep.getVendor()) ) {
+				if ( UserRole.VENDOR.toString().equals(loginUser.getRole()) && loginUser.getVendor()!=null && !loginUser.getVendor().equals(appUserRep.getVendor()) ) {
 					throw new ServiceAccessResourceFailureException();
 				}
 			
@@ -255,23 +301,28 @@ public class AppUserService {
 	
 	/**
 	 * Activate App User
-	 * @param appUserId
+	 * @param loginUser - Currently login user
+	 * @param appUserId - App User ID
 	 * @return
 	 */
-	public QuotationResponse activateAppUser(UserRole role, String vendorId, String userId, String appUserId) {
+	public QuotationResponse activateAppUser(AppUser loginUser, String appUserId) {
 		
 		LOG.log(Level.INFO, "Calling AppUser Service activateAppUser()");
 		
+		Util.checkIfAlreadyActivated(loginUser);
+		
 		QuotationResponse quotation = new QuotationResponse();
 		
-		if (appUserId == null || "".equals(appUserId))
+		if ( appUserId == null || "".equals(appUserId) )
 			quotation.addMessage(msgController.createMsg("error.MFE", "AppUser ID"));
 
 		if (quotation.getMessages().isEmpty()) {
 
 			AppUser appUserRep = appUserRepository.findById(appUserId).orElse(null);
+			
+			System.out.println("***********" + appUserRep);
 
-			if (appUserRep == null) {
+			if ( appUserRep == null ) {
 				quotation.addMessage(msgController.createMsg("error.AUNFE"));
 			} else {	
 				
@@ -279,36 +330,40 @@ public class AppUserService {
 					quotation.addMessage(msgController.createMsg("error.AUAAE"));
 				} else {
 					
-					if ( UserRole.VENDOR.equals(role) && vendorId!=null && !vendorId.equals(appUserRep.getVendor()) ) {
+					if ( UserRole.VENDOR.toString().equals(loginUser.getRole()) && loginUser.getVendor()!=null && !loginUser.getVendor().equals(appUserRep.getVendor()) ) {
 						throw new ServiceAccessResourceFailureException();
 					}
 					
 					appUserRep.setActiveIndicator(true);
-					Util.initalizeUpdatedInfo(appUserRep, userId, msgController.getMsg("info.AURA"));
+					Util.initalizeUpdatedInfo(appUserRep, loginUser.getUsername(), msgController.getMsg("info.AURA"));
 					appUserRepository.save(appUserRep);
 					quotation.addMessage(msgController.createMsg("info.AURA"));				
 				}
+				
+				appUserRep.setPassword("[Protected]");
 
 			}
-			appUserRep.setPassword("[Protected]");
+			
 			quotation.setAppUser(appUserRep);
+			
 
 		}
 		
 		return quotation;
 	}
 	
-	
-	
-	
+		
 	/**
-	 * Deactivate App User
-	 * @param appUserId
+	 * DeActivate App User
+	 * @param loginUser - Currently login user
+	 * @param appUserId - App User ID
 	 * @return
 	 */
-	public QuotationResponse deActivateAppUser(UserRole role, String vendorId, String userId, String appUserId) {
+	public QuotationResponse deActivateAppUser(AppUser loginUser, String appUserId) {
 		
 		LOG.log(Level.INFO, "Calling AppUser Service deActivateAppUser()");
+		
+		Util.checkIfAlreadyActivated(loginUser);
 		
 		QuotationResponse quotation = new QuotationResponse();
 		
@@ -327,18 +382,20 @@ public class AppUserService {
 					quotation.addMessage(msgController.createMsg("error.AUADAE"));
 				} else {
 					
-					if ( UserRole.VENDOR.equals(role) && vendorId!=null && !vendorId.equals(appUserRep.getVendor()) ) {
+					if ( UserRole.VENDOR.toString().equals(loginUser.getRole()) && loginUser.getVendor()!=null && !loginUser.getVendor().equals(appUserRep.getVendor()) ) {
 						throw new ServiceAccessResourceFailureException();
 					}
 					
 					appUserRep.setActiveIndicator(false);
-					Util.initalizeUpdatedInfo(appUserRep, userId, msgController.getMsg("info.AURDA"));
+					Util.initalizeUpdatedInfo(appUserRep, loginUser.getUsername(), msgController.getMsg("info.AURDA"));
 					appUserRepository.save(appUserRep);
 					quotation.addMessage(msgController.createMsg("info.AURDA"));				
 				}
+				
+				appUserRep.setPassword("[Protected]");
 
 			}
-			appUserRep.setPassword("[Protected]");
+			
 			quotation.setAppUser(appUserRep);
 
 		}
@@ -346,30 +403,47 @@ public class AppUserService {
 		return quotation;
 	}
 	
-	public void deActivateAllAppUser(String userId, String vendor) {
+	/**
+	 * DeActivate all App User under same Vendor
+	 * @param loginUser - Currently login user
+	 * @param vendor - Vendor ID
+	 * @return
+	 */
+	public void deActivateAllAppUser(AppUser loginUser, String vendor) {
 
+		Util.checkIfAlreadyActivated(loginUser);
+		
 		LOG.log(Level.INFO, "Calling AppUser Service deActivateAllAppUser()");		
 		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "name");
 		List<AppUser> listAppUser = appUserRepository.vendorFindAllAppUsers(vendor, pageable);
 		for(AppUser appUser : listAppUser) {
-			deActivateAppUser(UserRole.ADMIN, appUser.getVendor(), userId, appUser.getId());
-		}
-
-	}
-	
-	public void deleteAllAppUser(String vendor) {
-
-		LOG.log(Level.INFO, "Calling AppUser Service deActivateAllAppUser()");		
-		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "name");
-		List<AppUser> listAppUser = appUserRepository.vendorFindAllAppUsers(vendor, pageable);
-		for(AppUser appUser : listAppUser) {
-			deleteAppUser(UserRole.ADMIN, null, appUser.getId());
+			deActivateAppUser(loginUser, appUser.getId());
 		}
 
 	}
 	
 	/**
-	 * Delete all appuser records Should not be called
+	 * Delete all App User under same Vendor
+	 * @param loginUser - Currently login user
+	 * @param vendor - Vendor ID
+	 * @return
+	 */
+	public void deleteAllAppUser(AppUser loginUser, String vendor) {
+		
+		Util.checkIfAlreadyActivated(loginUser);
+
+		LOG.log(Level.INFO, "Calling AppUser Service deActivateAllAppUser()");		
+		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "name");
+		List<AppUser> listAppUser = appUserRepository.vendorFindAllAppUsers(vendor, pageable);
+		for(AppUser appUser : listAppUser) {
+			deleteAppUser(loginUser, appUser.getId());
+		}
+
+	}
+	
+	/**
+	 * Should not be called in the service. This is for unit testing purposes
+	 * @return
 	 */
 	public QuotationResponse deleteAllAppUser() {
 

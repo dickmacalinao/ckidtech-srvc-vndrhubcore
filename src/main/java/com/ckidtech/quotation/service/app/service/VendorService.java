@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.ckidtech.quotation.service.core.controller.MessageController;
 import com.ckidtech.quotation.service.core.controller.QuotationResponse;
 import com.ckidtech.quotation.service.core.dao.VendorRepository;
+import com.ckidtech.quotation.service.core.model.AppUser;
 import com.ckidtech.quotation.service.core.model.Vendor;
 import com.ckidtech.quotation.service.core.utils.Util;
 
@@ -40,7 +41,7 @@ public class VendorService {
 	private MessageController msgController;
 
 	/**
-	 * View all vendor records
+	 * View all vendor records by Administrator user
 	 * 
 	 * @return
 	 */
@@ -88,14 +89,14 @@ public class VendorService {
 	 * @param vendor
 	 * @return
 	 */
-	public QuotationResponse addVendor(String userId, Vendor vendor) {
+	public QuotationResponse addVendor(AppUser appUser, Vendor vendor) {
 
 		LOG.log(Level.INFO, "Calling Vendor Service addVendor()");
+		
+		Util.checkIfAlreadyActivated(appUser);
 
 		QuotationResponse quotation = new QuotationResponse();
 
-		if (vendor.getId() == null || "".equals(vendor.getId()))
-			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Code"));
 		if (vendor.getName() == null || "".equals(vendor.getName()))
 			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Name"));
 		if (vendor.getAddress() == null || "".equals(vendor.getAddress()))
@@ -103,15 +104,14 @@ public class VendorService {
 		if (vendor.getContactNo() == null || "".equals(vendor.getContactNo()))
 			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Contact No"));
 
-		if (quotation.getMessages().isEmpty()) {
-
-			Vendor vendorRep = vendorRepository.findById(vendor.getId()).orElse(null);
-
-			if (vendorRep != null) {				
+		if ( quotation.getMessages().isEmpty() ) {
+			
+			Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "name");
+			List<Vendor> vendors = vendorRepository.findByName(vendor.getName(), pageable);			
+			if ( vendors.size()>0 ) {				
 				quotation.addMessage(msgController.createMsg("error.VAEE"));
-				quotation.setVendor(vendorRep);
-			} else {
-				Util.initalizeCreatedInfo(vendor, userId, msgController.getMsg("info.VRC"));
+			} else {				
+				Util.initalizeCreatedInfo(vendor, appUser.getUsername(), msgController.getMsg("info.VRC"));
 				vendor.setActiveIndicator(false);
 				vendorRepository.save(vendor);
 				quotation.setVendor(vendor);
@@ -130,13 +130,15 @@ public class VendorService {
 	 * @param vendor
 	 * @return
 	 */
-	public QuotationResponse updateVendor(String userId, Vendor vendor) {
+	public QuotationResponse updateVendor(AppUser appUser, Vendor vendor) {
 		LOG.log(Level.INFO, "Calling Vendor Service updateVendor()");
+		
+		Util.checkIfAlreadyActivated(appUser);
 
 		QuotationResponse quotation = new QuotationResponse();
 
 		if (vendor.getId() == null || "".equals(vendor.getId()))
-			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Code"));
+			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));
 		if (vendor.getName() == null || "".equals(vendor.getName()))
 			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Name"));
 		if (vendor.getAddress() == null || "".equals(vendor.getAddress()))
@@ -152,7 +154,7 @@ public class VendorService {
 				quotation.addMessage(msgController.createMsg("error.VNFE"));
 			} else {
 
-				Util.initalizeUpdatedInfo(vendorRep, userId, vendorRep.getDifferences(vendor));				
+				Util.initalizeUpdatedInfo(vendorRep, appUser.getUsername(), vendorRep.getDifferences(vendor));				
 				vendorRep.setActiveIndicator(vendor.isActiveIndicator());
 				vendorRep.setName(vendor.getName());
 				vendorRep.setAddress(vendor.getAddress());
@@ -171,7 +173,8 @@ public class VendorService {
 	}
 
 	/**
-	 * Delete all vendor records Should not be called
+	 * Should not be called in the service. This is for unit testing purposes
+	 * @return
 	 */
 	public QuotationResponse deleteAllVendors() {
 
@@ -186,27 +189,29 @@ public class VendorService {
 	/**
 	 * Delete vendor record
 	 * 
-	 * @param vendorCode
+	 * @param vendorID
 	 * @return
 	 */
-	public QuotationResponse deleteVendor(String vendorCode) {
+	public QuotationResponse deleteVendor(AppUser appUser, String vendorID) {
 		LOG.log(Level.INFO, "Calling Vendor Service deleteVendor()");
 
+		Util.checkIfAlreadyActivated(appUser);
+		
 		QuotationResponse quotation = new QuotationResponse();
 
-		if (vendorCode == null || "".equals(vendorCode))
-			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Code"));
+		if (vendorID == null || "".equals(vendorID))
+			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));
 
 		if (quotation.getMessages().isEmpty()) {
 
-			Vendor vendorRep = vendorRepository.findById(vendorCode).orElse(null);
+			Vendor vendorRep = vendorRepository.findById(vendorID).orElse(null);
 
 			if (vendorRep == null) {
 				quotation.addMessage(msgController.createMsg("error.VNFE"));
 			} else {
 				
-				appUserService.deleteAllAppUser(vendorCode); // Delete all users under that vendor
-				productService.deleteAllVendorProducts(vendorCode); // Delete all products under that vendor
+				appUserService.deleteAllAppUser(appUser, vendorID); // Delete all users under that vendor
+				productService.deleteAllVendorProducts(appUser, vendorID); // Delete all products under that vendor
 				
 				vendorRepository.delete(vendorRep);
 				quotation.addMessage(msgController.createMsg("info.VRD"));
@@ -221,22 +226,24 @@ public class VendorService {
 	
 	/**
 	 * Use to Deactivate and activate vendor
-	 * @param vendorCode
+	 * @param vendorID
 	 * @return
 	 */	
 	
-	public QuotationResponse activateVendor(String userId, String vendorCode) {
+	public QuotationResponse activateVendor(AppUser appUser, String vendorID) {
 		
 		LOG.log(Level.INFO, "Calling Vendor Service activateVendor()");
+		
+		Util.checkIfAlreadyActivated(appUser);
 
 		QuotationResponse quotation = new QuotationResponse();
 
-		if (vendorCode == null || "".equals(vendorCode))
-			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Code"));
+		if (vendorID == null || "".equals(vendorID))
+			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));
 
 		if (quotation.getMessages().isEmpty()) {
 
-			Vendor vendorRep = vendorRepository.findById(vendorCode).orElse(null);
+			Vendor vendorRep = vendorRepository.findById(vendorID).orElse(null);
 
 			if (vendorRep == null) {
 				quotation.addMessage(msgController.createMsg("error.VNFE"));
@@ -246,7 +253,7 @@ public class VendorService {
 					quotation.addMessage(msgController.createMsg("error.VAAE"));
 				} else {
 					vendorRep.setActiveIndicator(true);
-					Util.initalizeUpdatedInfo(vendorRep, userId, msgController.getMsg("info.VRA"));
+					Util.initalizeUpdatedInfo(vendorRep, appUser.getUsername(), msgController.getMsg("info.VRA"));
 					vendorRepository.save(vendorRep);
 					quotation.addMessage(msgController.createMsg("info.VRA"));				
 				}
@@ -261,22 +268,24 @@ public class VendorService {
 	
 	/**
 	 * Use to Deactivate and activate vendor
-	 * @param vendorCode
+	 * @param vendorID
 	 * @return
 	 */	
 	
-	public QuotationResponse deActivateVendor(String userId, String vendorCode) {
+	public QuotationResponse deActivateVendor(AppUser appUser, String vendorID) {
 		
 		LOG.log(Level.INFO, "Calling Vendor Service deActivateVendor()");
+		
+		Util.checkIfAlreadyActivated(appUser);
 
 		QuotationResponse quotation = new QuotationResponse();
 
-		if (vendorCode == null || "".equals(vendorCode))
-			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Code"));
+		if (vendorID == null || "".equals(vendorID))
+			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));
 
 		if (quotation.getMessages().isEmpty()) {
 
-			Vendor vendorRep = vendorRepository.findById(vendorCode).orElse(null);
+			Vendor vendorRep = vendorRepository.findById(vendorID).orElse(null);
 
 			if (vendorRep == null) {
 				quotation.addMessage(msgController.createMsg("error.VNFE"));
@@ -286,9 +295,9 @@ public class VendorService {
 					quotation.addMessage(msgController.createMsg("error.VADAE"));
 				} else {
 					vendorRep.setActiveIndicator(false);
-					Util.initalizeUpdatedInfo(vendorRep, userId, msgController.getMsg("info.VRDA"));
+					Util.initalizeUpdatedInfo(vendorRep, appUser.getUsername(), msgController.getMsg("info.VRDA"));
 					
-					appUserService.deActivateAllAppUser(userId, vendorCode); // Deactivate all users under that vendor
+					appUserService.deActivateAllAppUser(appUser, vendorID); // Deactivate all users under that vendor
 					
 					vendorRepository.save(vendorRep);
 					quotation.addMessage(msgController.createMsg("info.VRDA"));
@@ -303,7 +312,4 @@ public class VendorService {
 		return quotation;
 	}
 	
-	
-	
-
 }

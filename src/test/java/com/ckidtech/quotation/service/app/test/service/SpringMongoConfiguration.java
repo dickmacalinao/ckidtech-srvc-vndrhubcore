@@ -10,7 +10,7 @@ public class SpringMongoConfiguration {
 
 	@Bean
 	public MongoTemplate mongoTemplate() throws Exception {
-		return new MongoTemplate(new MongoClient("localhost"), "appTest");
+		return new MongoTemplate(new MongoClient("localhost"), "unitTest");
 	}
 
 }

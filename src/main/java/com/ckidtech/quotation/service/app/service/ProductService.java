@@ -19,6 +19,7 @@ import com.ckidtech.quotation.service.core.dao.ProductRepository;
 import com.ckidtech.quotation.service.core.dao.ReferenceDataRepository;
 import com.ckidtech.quotation.service.core.dao.VendorRepository;
 import com.ckidtech.quotation.service.core.exception.ServiceAccessResourceFailureException;
+import com.ckidtech.quotation.service.core.model.AppUser;
 import com.ckidtech.quotation.service.core.model.Product;
 import com.ckidtech.quotation.service.core.model.ProductGroup;
 import com.ckidtech.quotation.service.core.model.ReferenceData;
@@ -46,67 +47,62 @@ public class ProductService {
 	@Autowired
 	private MessageController msgController;
 	
-	public QuotationResponse listProducts(String vendorCode, boolean flag) {	
+	public QuotationResponse listProducts(AppUser loginUser, boolean flag) {	
 		
-		LOG.log(Level.INFO, "Calling Vendor Service listProducts(" + vendorCode + "," + flag +")");
-		QuotationResponse quotation = new QuotationResponse();	
+		LOG.log(Level.INFO, "Calling Vendor Service listProducts(" + loginUser.getVendor() + "," + flag +")");
 		
-		Vendor vendor = vendorRepository.findById(vendorCode).orElse(null);
-		if ( vendor==null || !vendor.isActiveIndicator() ) {
-			quotation.addMessage(msgController.createMsg("error.VNFE"));
-		} else {
-			quotation.setProducts(productRepository.listProducts(vendorCode, flag));
-		}
+		Util.checkIfAlreadyActivated(loginUser);
+		
+		QuotationResponse quotation = new QuotationResponse();		
+		validateVendor(quotation, loginUser.getVendor());					
+		
+		quotation.setProducts(productRepository.listProducts(loginUser.getVendor(), flag));		
 				
 		return quotation;
 		
 	}	
 	
-	public QuotationResponse listProductsByGroup(String vendorCode, boolean flag) {
+	public QuotationResponse listProductsByGroup(AppUser loginUser, boolean flag) {
 		
-		LOG.log(Level.INFO, "Calling Vendor Service listProductsByGroup(" + vendorCode + "," + flag + ")");
-		QuotationResponse quotation = new QuotationResponse();
+		LOG.log(Level.INFO, "Calling Vendor Service listProductsByGroup(" + loginUser.getVendor() + "," + flag + ")");
 		
-		Vendor vendor = vendorRepository.findById(vendorCode).orElse(null);
-		if ( vendor==null || !vendor.isActiveIndicator() ) {
-			quotation.addMessage(msgController.createMsg("error.VNFE"));
-		} else {
+		Util.checkIfAlreadyActivated(loginUser);
+		
+		QuotationResponse quotation = new QuotationResponse();		
+		validateVendor(quotation, loginUser.getVendor());	
 			
-			List<ProductGroup> prodGroups = new ArrayList<ProductGroup>();
-			ProductGroup prodGroup;
-			
-			@SuppressWarnings("deprecation")
-			Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "grantTo", "value");
-			List<ReferenceData> groups =  referenceDataRepository.searchByRoleAndRefGroup(vendorCode, "ProductGroup", pageable);
-			int index = 0;
-			for ( ReferenceData group : groups ) {
-				prodGroup = new ProductGroup();
-				prodGroup.setTitle(group.getValue());			
-				prodGroup.setKey(group.getValue() + index);
-				prodGroup.setProducts(productRepository.listProductsByGroup(vendorCode, flag, group.getValue()));
-				prodGroups.add(prodGroup);
-				index++;
-			}
-			
-			quotation.setProdGroups(prodGroups);
-			
-		}		
+		List<ProductGroup> prodGroups = new ArrayList<ProductGroup>();
+		ProductGroup prodGroup;
+		
+		@SuppressWarnings("deprecation")
+		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "grantTo", "value");
+		List<ReferenceData> groups =  referenceDataRepository.searchByRoleAndRefGroup(loginUser.getVendor(), "ProductGroup", pageable);
+		int index = 0;
+		for ( ReferenceData group : groups ) {
+			prodGroup = new ProductGroup();
+			prodGroup.setTitle(group.getValue());			
+			prodGroup.setKey(group.getValue() + index);
+			prodGroup.setProducts(productRepository.listProductsByGroup(loginUser.getVendor(), flag, group.getValue()));
+			prodGroups.add(prodGroup);
+			index++;
+		}
+		
+		quotation.setProdGroups(prodGroups);
 				
 		return quotation;
 		
 	}
 	
-	public QuotationResponse searchProductsByName(String vendorCode, boolean flag, String productName) {	
+	public QuotationResponse searchProductsByName(AppUser loginUser, boolean flag, String productName) {	
 		
 		LOG.log(Level.INFO, "Calling Vendor Service searchProductsByName()");
-		QuotationResponse quotation = new QuotationResponse();	
 		
-		Vendor vendor = vendorRepository.findById(vendorCode).orElse(null);
-		if ( vendor==null || !vendor.isActiveIndicator() ) {
-			quotation.addMessage(msgController.createMsg("error.VNFE"));
-		} else {
-			quotation.setProducts(productRepository.searchProductsByName(vendorCode, flag, productName));
-		}
+		Util.checkIfAlreadyActivated(loginUser);
+		
+		QuotationResponse quotation = new QuotationResponse();		
+		validateVendor(quotation, loginUser.getVendor());
+		
+		quotation.setProducts(productRepository.searchProductsByName(loginUser.getVendor(), flag, productName));
 		
 		return quotation;
 		
@@ -117,39 +113,34 @@ public class ProductService {
 	 * @param product
 	 * @return
 	 */
-	public QuotationResponse addVendorProduct(String userId, Product product) {		
+	public QuotationResponse addVendorProduct(AppUser loginUser, Product product) {		
 		LOG.log(Level.INFO, "Calling Product Service addVendorProduct()");
 		
-		QuotationResponse quotation = new QuotationResponse();
+		Util.checkIfAlreadyActivated(loginUser);
 		
-		if ( product.getId()==null || "".equals(product.getId()) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "Product Code"));	
+		QuotationResponse quotation = new QuotationResponse();		
+		
 		if ( product.getName()==null || "".equals(product.getName()) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product Name"));
 		if ( product.getGroup()==null || "".equals(product.getGroup()) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product Group"));
-		if ( product.getVendorCode()==null || "".equals(product.getVendorCode()) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Code"));
 		
-		if( quotation.getMessages().isEmpty() ) {
+		validateVendor(quotation, loginUser.getVendor());
 		
-			Vendor vendorRep = vendorRepository.findById(product.getVendorCode()).orElse(null);
+		if( quotation.getMessages().isEmpty() ) {					
+
+			List<Product> products = productRepository.searchProductsByNameOnly(loginUser.getVendor(), product.getName());
 			
-			if ( vendorRep==null || !vendorRep.isActiveIndicator() ) {
-				quotation.addMessage(msgController.createMsg("error.VNFE"));
+			if  ( products.size()>0 ) {
+				quotation.addMessage(msgController.createMsg("error.VPAEE"));						
 			} else {
-				Product productRep = productRepository.findById(product.getId()).orElse(null);
-				
-				if  ( productRep!=null ) {
-					quotation.addMessage(msgController.createMsg("error.VPAEE"));						
-				} else {
-					Util.initalizeCreatedInfo(product, userId, msgController.getMsg("info.VPRC"));
-					product.setActiveIndicator(false);
-					productRepository.save(product);					
-					quotation.addMessage(msgController.createMsg("info.VPRC"));
-					quotation.setProduct(product);
-				}	
-			}
+				Util.initalizeCreatedInfo(product, loginUser.getUsername(), msgController.getMsg("info.VPRC"));
+				product.setActiveIndicator(false);
+				product.setVendorCode(loginUser.getVendor());
+				productRepository.save(product);					
+				quotation.addMessage(msgController.createMsg("info.VPRC"));
+				quotation.setProduct(product);
+			}	
 		}
 		
 		return quotation;
@@ -161,45 +152,53 @@ public class ProductService {
 	 * @param product
 	 * @return
 	 */
-	public QuotationResponse updateVendorProduct(String userId, Product product) {		
+	public QuotationResponse updateVendorProduct(AppUser loginUser, Product product) {		
 		LOG.log(Level.INFO, "Calling Product Service updateVendorProduct()");
+		
+		Util.checkIfAlreadyActivated(loginUser);
 		
 		QuotationResponse quotation = new QuotationResponse();
 		
 		if ( product.getId()==null || "".equals(product.getId()) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "Product Code"));	
+			quotation.addMessage(msgController.createMsg("error.MFE", "Product ID"));	
 		if ( product.getGroup()==null || "".equals(product.getGroup()) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product Group"));
 		if ( product.getName()==null || "".equals(product.getName()) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product Name"));
-		if ( product.getVendorCode()==null || "".equals(product.getVendorCode()) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Code"));
+		
+		validateVendor(quotation, loginUser.getVendor());
 		
 		if( quotation.getMessages().isEmpty() ) {
-		
-			Vendor vendorRep = vendorRepository.findById(product.getVendorCode()).orElse(null);
 			
-			if ( vendorRep==null || !vendorRep.isActiveIndicator() ) {
-				quotation.addMessage(msgController.createMsg("error.VNFE"));
+			Product productRep = productRepository.findById(product.getId()).orElse(null);
+			
+			if  ( productRep==null ) {
+				quotation.addMessage(msgController.createMsg("error.VPNFE"));
 			} else {
-				Product productRep = productRepository.findById(product.getId()).orElse(null);
 				
-				if  ( productRep==null ) {
-					quotation.addMessage(msgController.createMsg("error.VPNFE"));
-				} else {	
-						
+				// Check if same Name exists
+				List<Product> listPord = productRepository.searchProductsByNameOnly(loginUser.getVendor(), product.getName());				
+				for ( Product prod : listPord ) {
+					if ( prod.getName().equalsIgnoreCase(product.getName()) && prod.getId().equalsIgnoreCase(product.getId()) ) {
+						quotation.addMessage(msgController.createMsg("error.VPAEE"));
+					}					
+				}
+				
+				if( quotation.getMessages().isEmpty() ) {
 					productRep.setName(product.getName());
 					productRep.setGroup(product.getGroup());
+					productRep.setVendorCode(loginUser.getVendor());
 					productRep.setImgLocation(product.getImgLocation());
 					productRep.setProdComp(product.getProdComp());
 					
-					Util.initalizeUpdatedInfo(productRep, userId, msgController.getMsg("info.VPRU"));
+					Util.initalizeUpdatedInfo(productRep, loginUser.getUsername(), msgController.getMsg("info.VPRU"));
 					productRepository.save(productRep);
 					quotation.addMessage(msgController.createMsg("info.VPRU"));
 					quotation.setProduct(productRep);
-											
-				} 	
-			}
+				}
+										
+			} 	
+			
 		}
 		
 		return quotation;
@@ -211,96 +210,85 @@ public class ProductService {
 	 * @param product
 	 * @return
 	 */
-	public QuotationResponse activateVendorProduct(String vendorId, String userId, String productId) {		
+	public QuotationResponse activateVendorProduct(AppUser loginUser, String productId) {		
 		LOG.log(Level.INFO, "Calling Product Service activateVendorProduct()");
+		
+		Util.checkIfAlreadyActivated(loginUser);
 		
 		QuotationResponse quotation = new QuotationResponse();
 
-		if ( vendorId==null || "".equals(vendorId) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));	
-		if ( userId==null || "".equals(userId) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "User ID"));	
 		if ( productId==null || "".equals(productId) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product ID"));
 		
-		if( quotation.getMessages().isEmpty() ) {
+		validateVendor(quotation, loginUser.getVendor());
 		
-			Vendor vendorRep = vendorRepository.findById(vendorId).orElse(null);
+		if( quotation.getMessages().isEmpty() ) {
 			
-			if ( vendorRep==null || !vendorRep.isActiveIndicator() ) {
-				quotation.addMessage(msgController.createMsg("error.VNFE"));
+			Product productRep = productRepository.findById(productId).orElse(null);
+			
+			if  ( productRep==null ) {
+				quotation.addMessage(msgController.createMsg("error.VPNFE"));
 			} else {
-				Product productRep = productRepository.findById(productId).orElse(null);
 				
-				if  ( productRep==null ) {
-					quotation.addMessage(msgController.createMsg("error.VPNFE"));
+				if ( loginUser.getVendor()!=null && !loginUser.getVendor().equals(productRep.getVendorCode()) ) {
+					throw new ServiceAccessResourceFailureException();
+				}
+				
+				if ( productRep.isActiveIndicator() ) {
+					quotation.addMessage(msgController.createMsg("error.VPAAE"));
 				} else {
+					productRep.setActiveIndicator(true);						
+					Util.initalizeUpdatedInfo(productRep, loginUser.getUsername(), msgController.getMsg("info.VPRA"));
+					productRepository.save(productRep);
+					quotation.addMessage(msgController.createMsg("info.VPRA"));
+					quotation.setProduct(productRep);
 					
-					if ( vendorId!=null && !vendorId.equals(productRep.getVendorCode()) ) {
-						throw new ServiceAccessResourceFailureException();
-					}
-					
-					if ( productRep.isActiveIndicator() ) {
-						quotation.addMessage(msgController.createMsg("error.AUAAE"));
-					} else {
-						productRep.setActiveIndicator(true);						
-						Util.initalizeUpdatedInfo(productRep, userId, msgController.getMsg("info.VPRA"));
-						productRepository.save(productRep);
-						quotation.addMessage(msgController.createMsg("info.VPRA"));
-						quotation.setProduct(productRep);
-						
-					}
-					
-					
-				} 	
-			}
+				}
+				
+				
+			} 	
+			
 		}
 		
 		return quotation;
 			
 	}
 	
-	public QuotationResponse deActivateVendorProduct(String vendorId, String userId, String productId) {		
+	public QuotationResponse deActivateVendorProduct(AppUser loginUser, String productId) {		
 		LOG.log(Level.INFO, "Calling Product Service deActivateVendorProduct()");
 		
+		Util.checkIfAlreadyActivated(loginUser);
+		
 		QuotationResponse quotation = new QuotationResponse();
-
-		if ( vendorId==null || "".equals(vendorId) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));	
-		if ( userId==null || "".equals(userId) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "User ID"));	
+		
 		if ( productId==null || "".equals(productId) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product ID"));
 		
-		if( quotation.getMessages().isEmpty() ) {
+		validateVendor(quotation, loginUser.getVendor());
 		
-			Vendor vendorRep = vendorRepository.findById(vendorId).orElse(null);
+		if( quotation.getMessages().isEmpty() ) {
 			
-			if ( vendorRep==null || !vendorRep.isActiveIndicator() ) {
-				quotation.addMessage(msgController.createMsg("error.VNFE"));
+			Product productRep = productRepository.findById(productId).orElse(null);
+			
+			if  ( productRep==null ) {
+				quotation.addMessage(msgController.createMsg("error.VPNFE"));
 			} else {
-				Product productRep = productRepository.findById(productId).orElse(null);
 				
-				if  ( productRep==null ) {
-					quotation.addMessage(msgController.createMsg("error.VPNFE"));
+				if ( loginUser.getVendor()!=null && !loginUser.getVendor().equals(productRep.getVendorCode()) ) {
+					throw new ServiceAccessResourceFailureException();
+				}
+				
+				if ( !productRep.isActiveIndicator() ) {
+					quotation.addMessage(msgController.createMsg("error.VPADAE"));
 				} else {
-					
-					if ( vendorId!=null && !vendorId.equals(productRep.getVendorCode()) ) {
-						throw new ServiceAccessResourceFailureException();
-					}
-					
-					if ( !productRep.isActiveIndicator() ) {
-						quotation.addMessage(msgController.createMsg("error.VPADAE"));
-					} else {
-						productRep.setActiveIndicator(true);						
-						Util.initalizeUpdatedInfo(productRep, userId, msgController.getMsg("info.VPRD"));
-						productRepository.save(productRep);
-						quotation.addMessage(msgController.createMsg("info.VPRD"));
-						quotation.setProduct(productRep);						
-					}					
-					
-				} 	
-			}
+					productRep.setActiveIndicator(true);						
+					Util.initalizeUpdatedInfo(productRep, loginUser.getUsername(), msgController.getMsg("info.VPRDA"));
+					productRepository.save(productRep);
+					quotation.addMessage(msgController.createMsg("info.VPRDA"));
+					quotation.setProduct(productRep);						
+				}					
+				
+			} 	
 		}
 		
 		return quotation;
@@ -312,13 +300,17 @@ public class ProductService {
 	 * @param productCode
 	 * @return
 	 */
-	public QuotationResponse deleteVendorProduct(UserRole role, String vendorId, String productCode) {		
+	public QuotationResponse deleteVendorProduct(AppUser loginUser, String productCode) {		
 		LOG.log(Level.INFO, "Calling Vendor Service deleteVendorProduct()");	
+		
+		Util.checkIfAlreadyActivated(loginUser);
 		
 		QuotationResponse quotation = new QuotationResponse();
 
 		if ( productCode==null || "".equals(productCode) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "Product Code"));			
+			quotation.addMessage(msgController.createMsg("error.MFE", "Product ID"));	
+		
+		validateVendor(quotation, loginUser.getVendor());
 		
 		if( quotation.getMessages().isEmpty() ) {
 			
@@ -327,19 +319,12 @@ public class ProductService {
 			if ( productRep==null ) {
 				quotation.addMessage(msgController.createMsg("error.VPNFE"));
 			} else {
-				if ( productRep.isActiveIndicator() ) { 
-					
-					if ( UserRole.VENDOR.equals(role) && vendorId!=null && !vendorId.equals(productRep.getVendorCode()) ) {
-						throw new ServiceAccessResourceFailureException();
-					}
-					
-					productRepository.delete(productRep);
-					quotation.addMessage(msgController.createMsg("info.VPRD"));
-				} else {
-					quotation.addMessage(msgController.createMsg("error.VPADE"));
+				if ( UserRole.VENDOR.toString().equals(loginUser.getRole()) && loginUser.getVendor()!=null && !loginUser.getVendor().equals(productRep.getVendorCode()) ) {
+					throw new ServiceAccessResourceFailureException();
 				}
 				
-				quotation.addProduct(productRep);
+				productRepository.delete(productRep);
+				quotation.addMessage(msgController.createMsg("info.VPRD"));
 				
 			}
 		}			
@@ -352,22 +337,49 @@ public class ProductService {
 	 * Delete all products under given vendor
 	 * @param vendorCode
 	 */
-	public void deleteAllVendorProducts(String vendorCode) {	
+	public void deleteAllVendorProducts(AppUser loginUser, String vendorCode) {	
 		
 		LOG.log(Level.INFO, "Calling Vendor Service deleteAllVendorProducts()");
 		
+		Util.checkIfAlreadyActivated(loginUser);
+		
 		// Delete active products
-		QuotationResponse quotation = listProducts(vendorCode, true);		
+		QuotationResponse quotation = listProducts(loginUser, true);		
 		for (Product product : quotation.getProducts() ) {
-			deleteVendorProduct(UserRole.VENDOR, product.getVendorCode(), product.getId());
+			deleteVendorProduct(loginUser, product.getId());
 		}
 		
 		// Delete inactive products
-		quotation = listProducts(vendorCode, false);		
+		quotation = listProducts(loginUser, false);		
 		for (Product product : quotation.getProducts() ) {
-			deleteVendorProduct(UserRole.VENDOR, product.getVendorCode(), product.getId());
+			deleteVendorProduct(loginUser, product.getId());
 		}
 		
+	}
+	
+	
+	/**
+	 * Should not be called in the service. This is for unit testing purposes
+	 * @return
+	 */
+	public QuotationResponse deleteAllProducts() {
+
+		LOG.log(Level.INFO, "Calling Vendor Service deleteAllProducts()");
+		QuotationResponse quotation = new QuotationResponse();
+		productRepository.deleteAll();
+		quotation.addMessage(msgController.createMsg("info.AVPSD"));
+		return quotation;
+
+	}
+	
+	private void validateVendor(QuotationResponse quotation, String vendorId) {
+		
+		Vendor vendor = vendorRepository.findById(vendorId).orElse(null);		
+		if ( vendor==null ) {
+			quotation.addMessage(msgController.createMsg("error.VNFE"));
+		} else {
+			Util.checkIfAlreadyActivated(vendor);
+		}	
 	}
 	
 }
