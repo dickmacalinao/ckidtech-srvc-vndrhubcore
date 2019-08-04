@@ -374,12 +374,15 @@ public class ProductService {
 	
 	private void validateVendor(QuotationResponse quotation, String vendorId) {
 		
-		Vendor vendor = vendorRepository.findById(vendorId).orElse(null);		
-		if ( vendor==null ) {
-			quotation.addMessage(msgController.createMsg("error.VNFE"));
-		} else {
-			Util.checkIfAlreadyActivated(vendor);
-		}	
+		if ( vendorId!=null && !"".equals(vendorId) ) {
+			Vendor vendor = vendorRepository.findById(vendorId).orElse(null);		
+			if ( vendor==null ) {
+				quotation.addMessage(msgController.createMsg("error.VNFE"));
+			} else {
+				Util.checkIfAlreadyActivated(vendor);
+			}
+		}
+			
 	}
 	
 }
