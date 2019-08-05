@@ -72,8 +72,6 @@ public class VendorServiceTest {
 		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "Address", "9999999999", "imagelink"));
 		String id = response.getVendor().getId();
 		
-		System.out.println("Vendor:" + response.getVendor());
-		
 		Vendor vendor = vendorService.getVendorById(id);
 		assertEquals(id, vendor.getId());
 		assertEquals("Test Vendor", vendor.getName());
@@ -83,8 +81,18 @@ public class VendorServiceTest {
 	}
 
 	@Test
-	public void addVendorSuccessfulTest() {			
-		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "Address", "9999999999", "imagelink"));
+	public void addVendorTest() {	
+		
+		// Missing Mandatory fields
+		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("", "", "", ""));
+		assertEquals(3, response.getMessages().size());
+		assertTrue("Vendor Name is required.", response.getMessages().contains(new ReturnMessage("Vendor Name is required.", ReturnMessage.MessageTypeEnum.ERROR)));
+		assertTrue("Vendor Address is required.", response.getMessages().contains(new ReturnMessage("Vendor Address is required.", ReturnMessage.MessageTypeEnum.ERROR)));
+		assertTrue("Vendor Contact No is required.", response.getMessages().contains(new ReturnMessage("Vendor Contact No is required.", ReturnMessage.MessageTypeEnum.ERROR)));
+		
+		
+		// Successful Scenario
+		response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "Address", "9999999999", "imagelink"));
 		assertTrue("Vendor created.", response.getMessages().contains(new ReturnMessage("Vendor created.", ReturnMessage.MessageTypeEnum.INFO)));
 		
 		List<Vendor> allVendors = vendorService.viewAllVendors();
@@ -98,71 +106,46 @@ public class VendorServiceTest {
 		assertEquals("9999999999", vendor.getContactNo());
 		assertEquals("imagelink", vendor.getImgLocation());
 		
-	}
-	
-	@Test
-	public void addVendorWithDuplicateTest() {
-		
-		addVendorSuccessfulTest();
-		Vendor vendor = vendorService.viewAllVendors().get(0);
-		
-		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor(vendor.getId(), "Test Vendor", "Address", "9999999999", "imagelink"));
-		
-		List<Vendor> allVendors = vendorService.viewAllVendors();
-		assertEquals(1, allVendors.size());		
+		// Duplicate vendor test
+		response = vendorService.addVendor(ADMIN_USER, new Vendor(vendor.getId(), "Test Vendor", "Address", "9999999999", "imagelink"));
 		assertTrue("Vendor name already exists.", response.getMessages().contains(new ReturnMessage("Vendor name already exists.", ReturnMessage.MessageTypeEnum.ERROR)));
-		
 	}
 	
-	@Test
-	public void addVendorWithMissingMandatoryFieldsTest() {
-		
-		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("", "", "", ""));
-		assertEquals(3, response.getMessages().size());
-		assertTrue("Vendor Name is required.", response.getMessages().contains(new ReturnMessage("Vendor Name is required.", ReturnMessage.MessageTypeEnum.ERROR)));
-		assertTrue("Vendor Address is required.", response.getMessages().contains(new ReturnMessage("Vendor Address is required.", ReturnMessage.MessageTypeEnum.ERROR)));
-		assertTrue("Vendor Contact No is required.", response.getMessages().contains(new ReturnMessage("Vendor Contact No is required.", ReturnMessage.MessageTypeEnum.ERROR)));
-		
-	}
 	
 	@Test
-	public void updateVendorSuccessfulTest() {
+	public void updateVendorTest() {
 		
-		addVendorSuccessfulTest();
+		addVendorTest();
 		
-		Vendor vendor = vendorService.viewAllVendors().get(0);
-		
-		QuotationResponse response = vendorService.updateVendor(ADMIN_USER, new Vendor(vendor.getId(), "Test Vendor New", "Address New", "9999999999 New", "imagelink New"));
-		assertTrue("Vendor updated.", response.getMessages().contains(new ReturnMessage("Vendor updated.", ReturnMessage.MessageTypeEnum.INFO)));
-		
-		assertEquals("Test Vendor New", response.getVendor().getName());
-		assertEquals("Address New", response.getVendor().getAddress());
-		assertEquals("9999999999 New", response.getVendor().getContactNo());
-		assertEquals("imagelink New", response.getVendor().getImgLocation());
-	}
-	
-	@Test
-	public void updateVendorWithMissingMandatoryFieldsTest() {
-		
-		addVendorSuccessfulTest();
-		
+		// Missing Mandatory fields
 		QuotationResponse response = vendorService.updateVendor(ADMIN_USER, new Vendor("", "", "", "", ""));
 		assertEquals(4, response.getMessages().size());
 		assertTrue("Vendor ID is required.", response.getMessages().contains(new ReturnMessage("Vendor ID is required.", ReturnMessage.MessageTypeEnum.ERROR)));
 		assertTrue("Vendor Name is required.", response.getMessages().contains(new ReturnMessage("Vendor Name is required.", ReturnMessage.MessageTypeEnum.ERROR)));
 		assertTrue("Vendor Address is required.", response.getMessages().contains(new ReturnMessage("Vendor Address is required.", ReturnMessage.MessageTypeEnum.ERROR)));
 		assertTrue("Vendor Contact No is required.", response.getMessages().contains(new ReturnMessage("Vendor Contact No is required.", ReturnMessage.MessageTypeEnum.ERROR)));
-	}
-	
-	@Test
-	public void updateVendorButNoVendorFoundTest() {
 		
-		QuotationResponse response = vendorService.updateVendor(ADMIN_USER, new Vendor("TEST2", "Test Vendor New", "Address New", "9999999999 New", "imagelink New"));		
+		
+		// Successful scenario		
+		Vendor vendor = vendorService.viewAllVendors().get(0);
+		
+		response = vendorService.updateVendor(ADMIN_USER, new Vendor(vendor.getId(), "Test Vendor New", "Address New", "9999999999 New", "imagelink New"));
+		assertTrue("Vendor updated.", response.getMessages().contains(new ReturnMessage("Vendor updated.", ReturnMessage.MessageTypeEnum.INFO)));
+		
+		assertEquals("Test Vendor New", response.getVendor().getName());
+		assertEquals("Address New", response.getVendor().getAddress());
+		assertEquals("9999999999 New", response.getVendor().getContactNo());
+		assertEquals("imagelink New", response.getVendor().getImgLocation());
+		
+		// Vendor not found
+		response = vendorService.updateVendor(ADMIN_USER, new Vendor("TEST2", "Test Vendor New", "Address New", "9999999999 New", "imagelink New"));		
 		assertEquals("Vendor not found.", response.getMessages().get(0).getMessage());
 	}
 	
 	@Test
-	public void deleteVendorSuccessfulTest() {			
+	public void deleteVendorTest() {		
+		
+		// Successful delete
 		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "Address", "9999999999", "imagelink"));
 		
 		List<Vendor> allVendors = vendorService.viewAllVendors();
@@ -172,17 +155,19 @@ public class VendorServiceTest {
 		
 		List<Vendor> allVendors2 = vendorService.viewAllVendors();
 		assertEquals(0, allVendors2.size());
-	}
-	
-	@Test
-	public void deleteVendorButNoVendorFoundTest() {	
 		
-		QuotationResponse response = vendorService.deleteVendor(ADMIN_USER, "TEST2");		
+		
+		// Vendor not found
+		response = vendorService.deleteVendor(ADMIN_USER, "TEST2");		
 		assertTrue("Vendor not found.", response.getMessages().contains(new ReturnMessage("Vendor not found.", ReturnMessage.MessageTypeEnum.ERROR)));
 	}
 	
+	
 	@Test
-	public void activateVendorSuccessfulTest() {				
+	public void activateVendorTest() {	
+		
+		
+		// Successful activation
 		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "Address", "9999999999", "imagelink"));
 		
 		Vendor vendor = response.getVendor();		
@@ -192,25 +177,22 @@ public class VendorServiceTest {
 		
 		vendor = vendorService.getVendorById(vendor.getId());
 		assertEquals(true, vendor.isActiveIndicator());
-	}
-	
-	@Test
-	public void activateVendorVendorNotFoundTest() {				
-		QuotationResponse response = vendorService.activateVendor(ADMIN_USER, "TEST");
-		assertTrue("Vendor not found.", response.getMessages().contains(new ReturnMessage("Vendor not found.", ReturnMessage.MessageTypeEnum.ERROR)));		
-	}
-	
-	@Test
-	public void activateVendorVendorAlreadyActiveTest() {
 		
-		activateVendorSuccessfulTest();
-		Vendor vendor = vendorService.viewAllVendors().get(0);
-		QuotationResponse response = vendorService.activateVendor(ADMIN_USER, vendor.getId());
+		
+		// Vendor not found
+		response = vendorService.activateVendor(ADMIN_USER, "TEST");
+		assertTrue("Vendor not found.", response.getMessages().contains(new ReturnMessage("Vendor not found.", ReturnMessage.MessageTypeEnum.ERROR)));		
+		
+		
+		// Already activated vendor
+		response = vendorService.activateVendor(ADMIN_USER, vendor.getId());
 		assertTrue("Vendor is already active.", response.getMessages().contains(new ReturnMessage("Vendor is already active.", ReturnMessage.MessageTypeEnum.ERROR)));		
 	}
-	
+		
 	@Test
-	public void deActivateVendorSuccessulTest() {				
+	public void deActivateVendorTest() {				
+		
+		// Successful de-activation
 		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "Address", "9999999999", "imagelink"));
 		
 		Vendor vendor = vendorService.getVendorById(response.getVendor().getId());		
@@ -225,22 +207,17 @@ public class VendorServiceTest {
 		
 		vendor = vendorService.getVendorById(vendor.getId());
 		assertEquals(false, vendor.isActiveIndicator());
-	}
-	
-	@Test
-	public void deActivateVendorVendorNotFoundTest() {						
-		QuotationResponse response = vendorService.deActivateVendor(ADMIN_USER, "TEST");		
+		
+		
+		// Vendor not found
+		response = vendorService.deActivateVendor(ADMIN_USER, "TEST");		
 		assertTrue("Vendor not found.", response.getMessages().contains(new ReturnMessage("Vendor not found.", ReturnMessage.MessageTypeEnum.ERROR)));
-	}
-	
-	@Test
-	public void deActivateVendorVendorAlreadyDeactivatedTest() {
-		deActivateVendorSuccessulTest();
 		
-		Vendor vendor = vendorService.viewAllVendors().get(0);		
-		QuotationResponse response = vendorService.deActivateVendor(ADMIN_USER, vendor.getId());	
 		
+		// Vendor already deactivated
+		response = vendorService.deActivateVendor(ADMIN_USER, vendor.getId());			
 		assertTrue("Vendor is already deactivated.", response.getMessages().contains(new ReturnMessage("Vendor is already deactivated.", ReturnMessage.MessageTypeEnum.ERROR)));
+		
 	}
 	
 }
