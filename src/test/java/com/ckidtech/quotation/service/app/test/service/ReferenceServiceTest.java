@@ -15,14 +15,12 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.ckidtech.quotation.service.app.service.AppUserService;
 import com.ckidtech.quotation.service.app.service.ProductService;
 import com.ckidtech.quotation.service.app.service.ReferenceDataService;
 import com.ckidtech.quotation.service.app.service.VendorService;
+import com.ckidtech.quotation.service.appuser.service.AppUserService;
 import com.ckidtech.quotation.service.core.controller.QuotationResponse;
-import com.ckidtech.quotation.service.core.dao.VendorRepository;
 import com.ckidtech.quotation.service.core.model.AppUser;
-import com.ckidtech.quotation.service.core.model.Product;
 import com.ckidtech.quotation.service.core.model.ReferenceData;
 import com.ckidtech.quotation.service.core.model.ReturnMessage;
 import com.ckidtech.quotation.service.core.model.Vendor;
@@ -30,7 +28,7 @@ import com.ckidtech.quotation.service.core.security.UserRole;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {SpringMongoConfiguration.class})
-@ComponentScan({"com.ckidtech.quotation.service.app.service"})
+@ComponentScan({"com.ckidtech.quotation.service.app.service", "com.ckidtech.quotation.service.appuser.service"})
 @AutoConfigureDataMongo
 public class ReferenceServiceTest {
 		
@@ -47,13 +45,7 @@ public class ReferenceServiceTest {
 	@Autowired
 	private ReferenceDataService referenceDataService;
 	
-	
-	//public static AppUser ADMIN_USER = new AppUser("ADMIN", "Admin", "password", "", "ADMIN");	
-	//public static AppUser VENDOR_USER = new AppUser("TEST_VENDOR", "Vendor Admin", "password", "TEST_VENDOR", "VENDOR");
-	//public static String TEST_VENDOR = "TEST_VENDOR";
-	
-	public static AppUser USER_ADMIN = new AppUser("USER_ADMIN", "Administrator", "testpass", "", UserRole.ADMIN.toString());		
-	//public static AppUser USER_VENDOR_ADMIN = new AppUser("USER_VENDOR_ADMIN", "Administrator", "testpass", "TEST_VENDOR", UserRole.VENDOR.toString());
+	public static AppUser USER_ADMIN = new AppUser("USER_ADMIN", "Administrator", "testpass", UserRole.APP_ADMIN, "VendorHub", "", "");		
 	
 	public static Vendor TEST_VENDOR = new Vendor("Test Vendor", "Address", "9999999999", "imagelink");	
 	
@@ -71,7 +63,7 @@ public class ReferenceServiceTest {
 		assertTrue("Vendor created.", response.getMessages().contains(new ReturnMessage("Vendor created.", ReturnMessage.MessageTypeEnum.INFO)));
 		
 		// Create Vendor Admin User
-		response = appUserService.addAppUser(USER_ADMIN, new AppUser("USER_VENDOR_ADMIN", "Administrator", "testpass", response.getVendor().getId(), UserRole.VENDOR.toString()));	
+		response = appUserService.addAppUser(USER_ADMIN, new AppUser("USER_VENDOR_ADMIN", "Administrator", "testpass", UserRole.VENDOR_ADMIN, "VendorHub", "TEST", response.getVendor().getId()));	
 		assertTrue("User created.", response.getMessages().contains(new ReturnMessage("User created.", ReturnMessage.MessageTypeEnum.INFO)));
 
 	}
@@ -164,7 +156,7 @@ public class ReferenceServiceTest {
 		ReferenceData refData = response.getReferenceData();
 		
 		assertEquals(listRef.get(0).getId(), refData.getId());
-		assertEquals(userVendorAdmin.getVendor(), refData.getGrantTo());
+		assertEquals(userVendorAdmin.getObjectRef(), refData.getGrantTo());
 		assertEquals("ProductGroupNew", refData.getRefGroup());
 		assertEquals("Food New", refData.getValue());
 		assertEquals(false, refData.getDefaultFlag());
@@ -193,7 +185,7 @@ public class ReferenceServiceTest {
 		AppUser userVendorAdmin = appUserService.getAppUserById("USER_VENDOR_ADMIN");
 		
 		QuotationResponse response = referenceDataService.updateReferenceData(userVendorAdmin, 
-				new ReferenceData("TESTREF", userVendorAdmin.getVendor(), "ProductGroupNew", "Food New", false));
+				new ReferenceData("TESTREF", userVendorAdmin.getObjectRef(), "ProductGroupNew", "Food New", false));
 		
 		assertTrue("Reference data not found.", response.getMessages().contains(new ReturnMessage("Reference data not found.", ReturnMessage.MessageTypeEnum.ERROR)));
 	}

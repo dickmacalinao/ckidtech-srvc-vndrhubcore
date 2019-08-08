@@ -36,7 +36,7 @@ public class QuotationControllerProduct {
 		LOG.log(Level.INFO, "Calling API /product/vendor/listactiveproducts");	
 		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.VENDOR, null);	
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);	
 		return new ResponseEntity<Object>(productService.listProducts(loginUser, true), HttpStatus.OK);		
 	}
 	
@@ -45,7 +45,7 @@ public class QuotationControllerProduct {
 		LOG.log(Level.INFO, "Calling API /product/vendor/listinactiveproducts");	
 
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.VENDOR, null);	
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);	
 		return new ResponseEntity<Object>(productService.listProducts(loginUser, false), HttpStatus.OK);		
 	}
 	
@@ -54,7 +54,7 @@ public class QuotationControllerProduct {
 		LOG.log(Level.INFO, "Calling API /product/vendor/listactiveproductsbygroup");	
 		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.VENDOR, null);
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(productService.listProductsByGroup(loginUser, true), HttpStatus.OK);		
 	}
 	
@@ -63,7 +63,7 @@ public class QuotationControllerProduct {
 		LOG.log(Level.INFO, "Calling API /product/vendor/listinactiveproductsbygroup");	
 		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.VENDOR, null);
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(productService.listProductsByGroup(loginUser, false), HttpStatus.OK);		
 	}
 		
@@ -73,7 +73,7 @@ public class QuotationControllerProduct {
 		LOG.log(Level.INFO, "Calling API /product/vendor/createproduct:" + product + ")");	
 		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.VENDOR, product.getVendorCode());		
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, product.getVendorCode());		
 		return new ResponseEntity<Object>(productService.addVendorProduct(loginUser, product), HttpStatus.CREATED);		
 	}
 	
@@ -83,7 +83,7 @@ public class QuotationControllerProduct {
 		LOG.log(Level.INFO, "Calling API /product/vendor/updateproduct:" + product + ")");
 		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.VENDOR, product.getVendorCode());				
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, product.getVendorCode());				
 		return new ResponseEntity<Object>(productService.updateVendorProduct(loginUser, product), HttpStatus.OK);		
 	}
 	
@@ -93,7 +93,7 @@ public class QuotationControllerProduct {
 		LOG.log(Level.INFO, "Calling API /product/vendor/activateproduct/" + productId + ")");
 		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.VENDOR, null);
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(productService.activateVendorProduct(loginUser, productId), HttpStatus.OK);		
 	}
 	
@@ -103,7 +103,7 @@ public class QuotationControllerProduct {
 		LOG.log(Level.INFO, "Calling API /product/vendor/deactivateproduct/" + productId + ")");
 
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.VENDOR, null);
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(productService.deActivateVendorProduct(loginUser, productId), HttpStatus.OK);		
 	}
 	
@@ -115,7 +115,7 @@ public class QuotationControllerProduct {
 		
 		AppUser loginUser = new AppUser(authorization);
 		for(Product product : products) {
-			Util.checkAccessGrant(loginUser, UserRole.VENDOR, product.getVendorCode());
+			Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, product.getVendorCode());
 			quotations.add(productService.addVendorProduct(loginUser, product));
 		}
 		return new ResponseEntity<Object>(quotations, HttpStatus.CREATED);		
@@ -126,7 +126,7 @@ public class QuotationControllerProduct {
 			@PathVariable("productId") String productId) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /product/vendor/deletevendorproduct/" + productId);
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.VENDOR, null);
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(productService.deleteVendorProduct(loginUser, productId), HttpStatus.OK);		
 	}
 	

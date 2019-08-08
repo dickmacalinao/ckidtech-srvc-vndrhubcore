@@ -31,7 +31,7 @@ public class VendorServiceTest {
 	@Autowired
 	VendorService vendorService;	
 	
-	public static AppUser ADMIN_USER = new AppUser("ADMIN", "Administrator", "testpass", "", UserRole.ADMIN.toString());
+	public static AppUser ADMIN_USER = new AppUser("ADMIN", "Administrator", "testpass", "", UserRole.APP_ADMIN, "VendorHub", "", "");
 	
 	@Before
 	public  void initTest() {

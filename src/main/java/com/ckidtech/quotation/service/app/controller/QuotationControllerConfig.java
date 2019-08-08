@@ -62,7 +62,7 @@ public class QuotationControllerConfig {
 		LOG.log(Level.INFO, "Calling API /config/admin/createreferencedata");
 		
 		AppUser loginUser = new AppUser(authorization);		
-		Util.checkAccessGrant(loginUser, UserRole.ADMIN, null);
+		Util.checkAccessGrant(loginUser, UserRole.APP_ADMIN, null);
 		return new ResponseEntity<Object>(referenceDataService.createReferenceData(loginUser, refData), HttpStatus.OK);		
 	}
 	
@@ -73,7 +73,7 @@ public class QuotationControllerConfig {
 		LOG.log(Level.INFO, "Calling API /config/admin/createreferencedatamultiple");
 		
 		AppUser loginUser = new AppUser(authorization);		
-		Util.checkAccessGrant(loginUser, UserRole.ADMIN, null);
+		Util.checkAccessGrant(loginUser, UserRole.APP_ADMIN, null);
 		List<QuotationResponse> listRefData = new ArrayList<QuotationResponse>();
 		for (ReferenceData refData : refDataMutiple) {
 			listRefData.add(referenceDataService.createReferenceData(loginUser, refData));
@@ -89,7 +89,7 @@ public class QuotationControllerConfig {
 		LOG.log(Level.INFO, "Calling API /config/vendor/createreferencedata");
 		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.VENDOR, null);
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(referenceDataService.createReferenceData(loginUser, refData), HttpStatus.OK);		
 	}
 	
@@ -99,7 +99,7 @@ public class QuotationControllerConfig {
 		LOG.log(Level.INFO, "Calling API /config/vendor/updatereferencedata");		
 		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.VENDOR, null);
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(referenceDataService.updateReferenceData(loginUser, refData), HttpStatus.OK);		
 	}
 	
@@ -109,9 +109,9 @@ public class QuotationControllerConfig {
 		LOG.log(Level.INFO, "Calling API /config/vendor/viewreferencedatabygroup");
 
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.VENDOR, null);
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(
-			referenceDataService.viewReferenceDataByRoleAndRefGroup(loginUser.getVendor(), refGroup), HttpStatus.OK);		
+			referenceDataService.viewReferenceDataByRoleAndRefGroup(loginUser.getObjectRef(), refGroup), HttpStatus.OK);		
 	}
 	
 	// Service for USER only
@@ -122,10 +122,10 @@ public class QuotationControllerConfig {
 		LOG.log(Level.INFO, "Calling API /config/user/viewreferencedatabygroup");
 		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.VENDOR, null);
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		
 		return new ResponseEntity<Object>(
-			referenceDataService.viewReferenceDataByRoleAndRefGroup(loginUser.getVendor(), refGroup), HttpStatus.OK);		
+			referenceDataService.viewReferenceDataByRoleAndRefGroup(loginUser.getObjectRef(), refGroup), HttpStatus.OK);		
 	}
 			
 }

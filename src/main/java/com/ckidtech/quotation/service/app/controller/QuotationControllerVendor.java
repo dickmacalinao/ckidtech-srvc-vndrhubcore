@@ -37,14 +37,14 @@ public class QuotationControllerVendor {
 	@RequestMapping(value = "/vendor/admin/viewallvendors")
 	public ResponseEntity<Object> viewAllVendors(@RequestHeader("authorization") String authorization) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /vendor/admin/viewallvendors");
-		Util.checkAccessGrant(new AppUser(authorization), UserRole.ADMIN, null);
+		Util.checkAccessGrant(new AppUser(authorization), UserRole.APP_ADMIN, null);
 		return new ResponseEntity<Object>(vendorService.viewAllVendors(), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/vendor/admin/viewactivevendors")
 	public ResponseEntity<Object> viewActiveVendors(@RequestHeader("authorization") String authorization) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /vendor/admin/viewactivevendors");
-		Util.checkAccessGrant(new AppUser(authorization), UserRole.ADMIN, null);
+		Util.checkAccessGrant(new AppUser(authorization), UserRole.APP_ADMIN, null);
 		return new ResponseEntity<Object>(vendorService.viewActiveVendors(), HttpStatus.OK);		
 	}
 	
@@ -52,7 +52,7 @@ public class QuotationControllerVendor {
 	public ResponseEntity<Object> searchVendorsByName(@RequestHeader("authorization") String authorization, 
 			@PathVariable("name") String name) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /vendor/admin/searchvendorbyname");
-		Util.checkAccessGrant(new AppUser(authorization), UserRole.ADMIN, null);
+		Util.checkAccessGrant(new AppUser(authorization), UserRole.APP_ADMIN, null);
 		return new ResponseEntity<Object>(vendorService.searchVendors(name), HttpStatus.OK);		
 	}
 	
@@ -60,7 +60,7 @@ public class QuotationControllerVendor {
 	public ResponseEntity<Object> getVendorById(@RequestHeader("authorization") String authorization, 
 			@PathVariable("id") String id) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /vendor/admin/getvendorbyid");
-		Util.checkAccessGrant(new AppUser(authorization), UserRole.ADMIN, null);
+		Util.checkAccessGrant(new AppUser(authorization), UserRole.APP_ADMIN, null);
 		return new ResponseEntity<Object>(vendorService.getVendorById(id), HttpStatus.OK);		
 	}
 		
@@ -70,7 +70,7 @@ public class QuotationControllerVendor {
 		LOG.log(Level.INFO, "Calling API /vendor/admin/createvendor:" + vendor + ")");
 		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.ADMIN, null);
+		Util.checkAccessGrant(loginUser, UserRole.APP_ADMIN, null);
 		return new ResponseEntity<Object>(vendorService.addVendor(loginUser, vendor), HttpStatus.CREATED);		
 	}
 	
@@ -80,7 +80,7 @@ public class QuotationControllerVendor {
 		LOG.log(Level.INFO, "Calling API /vendor/admin/createvendors");
 		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.ADMIN, null);
+		Util.checkAccessGrant(loginUser, UserRole.APP_ADMIN, null);
 		
 		ArrayList<QuotationResponse> quotations = new ArrayList<QuotationResponse>();  
 		for (Vendor vendor : vendors) {
@@ -95,7 +95,7 @@ public class QuotationControllerVendor {
 		LOG.log(Level.INFO, "Calling API /vendor/admin/updatevendor:" + vendor + ")");	
 		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.ADMIN, null);
+		Util.checkAccessGrant(loginUser, UserRole.APP_ADMIN, null);
 		return new ResponseEntity<Object>(vendorService.updateVendor(loginUser, vendor), HttpStatus.OK);		
 	}
 	
@@ -105,7 +105,7 @@ public class QuotationControllerVendor {
 		LOG.log(Level.INFO, "Calling API /vendor/admin/activateevendor:" + vendorCode + ")");
 		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.ADMIN, null);
+		Util.checkAccessGrant(loginUser, UserRole.APP_ADMIN, null);
 		return new ResponseEntity<Object>(vendorService.activateVendor(loginUser, vendorCode), HttpStatus.OK);		
 	}
 	
@@ -115,7 +115,7 @@ public class QuotationControllerVendor {
 		LOG.log(Level.INFO, "Calling API /vendor/admin/deactivateevendor:" + vendorCode + ")");
 		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.ADMIN, null);
+		Util.checkAccessGrant(loginUser, UserRole.APP_ADMIN, null);
 		
 		return new ResponseEntity<Object>(vendorService.deActivateVendor(loginUser, vendorCode), HttpStatus.OK);		
 	}
@@ -126,7 +126,7 @@ public class QuotationControllerVendor {
 		LOG.log(Level.INFO, "Calling API /vendor/admin/deactivateevendor:" + vendorCode + ")");
 		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.ADMIN, null);
+		Util.checkAccessGrant(loginUser, UserRole.APP_ADMIN, null);
 		return new ResponseEntity<Object>(vendorService.deleteVendor(loginUser, vendorCode), HttpStatus.OK);		
 	}
 	
@@ -137,8 +137,8 @@ public class QuotationControllerVendor {
 		LOG.log(Level.INFO, "Calling API /vendor/vendor/getvendorbyid");
 		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.VENDOR, null);
-		return new ResponseEntity<Object>(vendorService.getVendorById(loginUser.getVendor()), HttpStatus.OK);		
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
+		return new ResponseEntity<Object>(vendorService.getVendorById(loginUser.getObjectRef()), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/vendor/vendor/updatevendor", method = RequestMethod.POST)
@@ -146,7 +146,7 @@ public class QuotationControllerVendor {
 			@RequestBody Vendor vendor) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /vendor/vendor/updatevendor:" + vendor + ")");		
 		AppUser loginUser = new AppUser(authorization);
-		Util.checkAccessGrant(loginUser, UserRole.VENDOR, vendor.getId());
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, vendor.getId());
 		return new ResponseEntity<Object>(vendorService.updateVendor(loginUser, vendor), HttpStatus.OK);		
 	}
 	

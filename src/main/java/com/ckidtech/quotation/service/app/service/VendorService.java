@@ -31,11 +31,11 @@ public class VendorService {
 	@Autowired
 	private VendorRepository vendorRepository;
 	
-	@Autowired
-	private AppUserService appUserService;
+	//@Autowired
+	//private AppUserService appUserService;
 	
-	@Autowired
-	private ProductService productService;
+	//@Autowired
+	//private ProductService productService;
 
 	@Autowired
 	private MessageController msgController;
@@ -210,8 +210,8 @@ public class VendorService {
 				quotation.addMessage(msgController.createMsg("error.VNFE"));
 			} else {
 				
-				appUserService.deleteAllAppUser(appUser, vendorID); // Delete all users under that vendor
-				productService.deleteAllVendorProducts(appUser, vendorID); // Delete all products under that vendor
+				//appUserService.deleteAllAppUser(appUser, vendorID); // Delete all users under that vendor
+				//productService.deleteAllVendorProducts(appUser, vendorID); // Delete all products under that vendor
 				
 				vendorRepository.delete(vendorRep);
 				quotation.addMessage(msgController.createMsg("info.VRD"));
@@ -297,7 +297,7 @@ public class VendorService {
 					vendorRep.setActiveIndicator(false);
 					Util.initalizeUpdatedInfo(vendorRep, appUser.getUsername(), msgController.getMsg("info.VRDA"));
 					
-					appUserService.deActivateAllAppUser(appUser, vendorID); // Deactivate all users under that vendor
+					//appUserService.deActivateAllAppUser(appUser, vendorID); // Deactivate all users under that vendor
 					
 					vendorRepository.save(vendorRep);
 					quotation.addMessage(msgController.createMsg("info.VRDA"));

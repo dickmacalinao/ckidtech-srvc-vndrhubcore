@@ -49,14 +49,14 @@ public class ProductService {
 	
 	public QuotationResponse listProducts(AppUser loginUser, boolean flag) {	
 		
-		LOG.log(Level.INFO, "Calling Vendor Service listProducts(" + loginUser.getVendor() + "," + flag +")");
+		LOG.log(Level.INFO, "Calling Vendor Service listProducts(" + loginUser + "," + flag +")");
 		
 		Util.checkIfAlreadyActivated(loginUser);
 		
 		QuotationResponse quotation = new QuotationResponse();		
-		validateVendor(quotation, loginUser.getVendor());					
+		validateVendor(quotation, loginUser.getObjectRef());					
 		
-		quotation.setProducts(productRepository.listProducts(loginUser.getVendor(), flag));		
+		quotation.setProducts(productRepository.listProducts(loginUser.getObjectRef(), flag));		
 				
 		return quotation;
 		
@@ -64,25 +64,25 @@ public class ProductService {
 	
 	public QuotationResponse listProductsByGroup(AppUser loginUser, boolean flag) {
 		
-		LOG.log(Level.INFO, "Calling Vendor Service listProductsByGroup(" + loginUser.getVendor() + "," + flag + ")");
+		LOG.log(Level.INFO, "Calling Vendor Service listProductsByGroup(" + loginUser + "," + flag + ")");
 		
 		Util.checkIfAlreadyActivated(loginUser);
 		
 		QuotationResponse quotation = new QuotationResponse();		
-		validateVendor(quotation, loginUser.getVendor());	
+		validateVendor(quotation, loginUser.getObjectRef());	
 			
 		List<ProductGroup> prodGroups = new ArrayList<ProductGroup>();
 		ProductGroup prodGroup;
 		
 		@SuppressWarnings("deprecation")
 		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "grantTo", "value");
-		List<ReferenceData> groups =  referenceDataRepository.searchByRoleAndRefGroup(loginUser.getVendor(), "ProductGroup", pageable);
+		List<ReferenceData> groups =  referenceDataRepository.searchByRoleAndRefGroup(loginUser.getObjectRef(), "ProductGroup", pageable);
 		int index = 0;
 		for ( ReferenceData group : groups ) {
 			prodGroup = new ProductGroup();
 			prodGroup.setTitle(group.getValue());			
 			prodGroup.setKey(group.getValue() + index);
-			prodGroup.setProducts(productRepository.listProductsByGroup(loginUser.getVendor(), flag, group.getValue()));
+			prodGroup.setProducts(productRepository.listProductsByGroup(loginUser.getObjectRef(), flag, group.getValue()));
 			prodGroups.add(prodGroup);
 			index++;
 		}
@@ -100,9 +100,9 @@ public class ProductService {
 		Util.checkIfAlreadyActivated(loginUser);
 		
 		QuotationResponse quotation = new QuotationResponse();		
-		validateVendor(quotation, loginUser.getVendor());
+		validateVendor(quotation, loginUser.getObjectRef());
 		
-		quotation.setProducts(productRepository.searchProductsByName(loginUser.getVendor(), flag, productName));
+		quotation.setProducts(productRepository.searchProductsByName(loginUser.getObjectRef(), flag, productName));
 		
 		return quotation;
 		
@@ -125,18 +125,18 @@ public class ProductService {
 		if ( product.getGroup()==null || "".equals(product.getGroup()) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product Group"));
 		
-		validateVendor(quotation, loginUser.getVendor());
+		validateVendor(quotation, loginUser.getObjectRef());
 		
 		if( quotation.getMessages().isEmpty() ) {					
 
-			List<Product> products = productRepository.searchProductsByNameOnly(loginUser.getVendor(), product.getName());
+			List<Product> products = productRepository.searchProductsByNameOnly(loginUser.getObjectRef(), product.getName());
 			
 			if  ( products.size()>0 ) {
 				quotation.addMessage(msgController.createMsg("error.VPAEE"));						
 			} else {
 				Util.initalizeCreatedInfo(product, loginUser.getUsername(), msgController.getMsg("info.VPRC"));
 				product.setActiveIndicator(false);
-				product.setVendorCode(loginUser.getVendor());
+				product.setVendorCode(loginUser.getObjectRef());
 				productRepository.save(product);					
 				quotation.addMessage(msgController.createMsg("info.VPRC"));
 				quotation.setProduct(product);
@@ -166,7 +166,7 @@ public class ProductService {
 		if ( product.getName()==null || "".equals(product.getName()) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product Name"));
 		
-		validateVendor(quotation, loginUser.getVendor());
+		validateVendor(quotation, loginUser.getObjectRef());
 		
 		if( quotation.getMessages().isEmpty() ) {
 			
@@ -177,7 +177,7 @@ public class ProductService {
 			} else {
 				
 				// Check if same Name exists
-				List<Product> listPord = productRepository.searchProductsByNameOnly(loginUser.getVendor(), product.getName());				
+				List<Product> listPord = productRepository.searchProductsByNameOnly(loginUser.getObjectRef(), product.getName());				
 				for ( Product prod : listPord ) {
 					if ( prod.getName().equalsIgnoreCase(product.getName()) && prod.getId().equalsIgnoreCase(product.getId()) ) {
 						quotation.addMessage(msgController.createMsg("error.VPAEE"));
@@ -187,7 +187,7 @@ public class ProductService {
 				if( quotation.getMessages().isEmpty() ) {
 					productRep.setName(product.getName());
 					productRep.setGroup(product.getGroup());
-					productRep.setVendorCode(loginUser.getVendor());
+					productRep.setVendorCode(loginUser.getObjectRef());
 					productRep.setImgLocation(product.getImgLocation());
 					productRep.setProdComp(product.getProdComp());
 					
@@ -220,7 +220,7 @@ public class ProductService {
 		if ( productId==null || "".equals(productId) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product ID"));
 		
-		validateVendor(quotation, loginUser.getVendor());
+		validateVendor(quotation, loginUser.getObjectRef());
 		
 		if( quotation.getMessages().isEmpty() ) {
 			
@@ -230,7 +230,7 @@ public class ProductService {
 				quotation.addMessage(msgController.createMsg("error.VPNFE"));
 			} else {
 				
-				if ( loginUser.getVendor()!=null && !loginUser.getVendor().equals(productRep.getVendorCode()) ) {
+				if ( loginUser.getObjectRef()!=null && !loginUser.getObjectRef().equals(productRep.getVendorCode()) ) {
 					throw new ServiceAccessResourceFailureException();
 				}
 				
@@ -264,7 +264,7 @@ public class ProductService {
 		if ( productId==null || "".equals(productId) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product ID"));
 		
-		validateVendor(quotation, loginUser.getVendor());
+		validateVendor(quotation, loginUser.getObjectRef());
 		
 		if( quotation.getMessages().isEmpty() ) {
 			
@@ -274,7 +274,7 @@ public class ProductService {
 				quotation.addMessage(msgController.createMsg("error.VPNFE"));
 			} else {
 				
-				if ( loginUser.getVendor()!=null && !loginUser.getVendor().equals(productRep.getVendorCode()) ) {
+				if ( loginUser.getObjectRef()!=null && !loginUser.getObjectRef().equals(productRep.getVendorCode()) ) {
 					throw new ServiceAccessResourceFailureException();
 				}
 				
@@ -310,7 +310,7 @@ public class ProductService {
 		if ( productCode==null || "".equals(productCode) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product ID"));	
 		
-		validateVendor(quotation, loginUser.getVendor());
+		validateVendor(quotation, loginUser.getObjectRef());
 		
 		if( quotation.getMessages().isEmpty() ) {
 			
@@ -319,7 +319,7 @@ public class ProductService {
 			if ( productRep==null ) {
 				quotation.addMessage(msgController.createMsg("error.VPNFE"));
 			} else {
-				if ( UserRole.VENDOR.toString().equals(loginUser.getRole()) && loginUser.getVendor()!=null && !loginUser.getVendor().equals(productRep.getVendorCode()) ) {
+				if ( UserRole.VENDOR_ADMIN.equals(loginUser.getRole()) && loginUser.getObjectRef()!=null && !loginUser.getObjectRef().equals(productRep.getVendorCode()) ) {
 					throw new ServiceAccessResourceFailureException();
 				}
 				
