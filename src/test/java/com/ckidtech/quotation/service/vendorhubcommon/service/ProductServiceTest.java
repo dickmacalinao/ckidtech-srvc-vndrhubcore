@@ -15,15 +15,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.ckidtech.quotation.service.appuser.service.AppUserService;
 import com.ckidtech.quotation.service.core.controller.QuotationResponse;
+import com.ckidtech.quotation.service.core.dao.AppUserRepository;
 import com.ckidtech.quotation.service.core.model.AppUser;
 import com.ckidtech.quotation.service.core.model.Product;
 import com.ckidtech.quotation.service.core.model.ReturnMessage;
 import com.ckidtech.quotation.service.core.model.Vendor;
 import com.ckidtech.quotation.service.core.security.UserRole;
-import com.ckidtech.quotation.service.vendorhubcommon.service.ProductService;
-import com.ckidtech.quotation.service.vendorhubcommon.service.VendorService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {SpringMongoConfiguration.class})
@@ -33,12 +31,12 @@ public class ProductServiceTest {
 	
 	@Autowired
 	private VendorService vendorService;
+
+	@Autowired
+	private ProductService productService;	
 	
 	@Autowired
-	private AppUserService appUserService;
-	
-	@Autowired
-	private ProductService productService;
+	private AppUserRepository appUserRepository;
 	
 	public static AppUser APP_ADMIN = new AppUser("APP_ADMIN", "Administrator", "testpass", UserRole.APP_ADMIN, "VendorHub", "", "");
 	
@@ -52,9 +50,9 @@ public class ProductServiceTest {
 	@Before
 	public  void initTest() {	
 		
-		vendorService.deleteAllVendors();
-		appUserService.deleteAllAppUser();
+		vendorService.deleteAllVendors();		
 		productService.deleteAllProducts();
+		appUserRepository.deleteAll();
 		
 		APP_ADMIN.setActiveIndicator(true);
 		
@@ -64,9 +62,11 @@ public class ProductServiceTest {
 		assertTrue("Vendor created.", response.getMessages().contains(new ReturnMessage("Vendor created.", ReturnMessage.MessageTypeEnum.INFO)));
 		
 		// Create Vendor Admin User
-		response = appUserService.addAppUser(APP_ADMIN, new AppUser("USER_VENDOR_ADMIN", "Administrator", "testpass", UserRole.VENDOR_ADMIN, "VendorHub", "TEST", response.getVendor().getId()));
-		APP_ADMIN_ID = response.getAppUser().getId();
-		assertTrue("User created.", response.getMessages().contains(new ReturnMessage("User created.", ReturnMessage.MessageTypeEnum.INFO)));
+		AppUser appUserVendorAdmin = new AppUser("USER_VENDOR_ADMIN", "Administrator", "testpass", UserRole.VENDOR_ADMIN, "VendorHub", "TEST", TEST_VENDOR_ID);
+		appUserVendorAdmin.setActiveIndicator(true);
+		appUserRepository.save(appUserVendorAdmin);
+		APP_ADMIN_ID = appUserVendorAdmin.getId();		
+		assertEquals(true, appUserVendorAdmin.isActiveIndicator());
 		
 	}
 	
@@ -86,10 +86,9 @@ public class ProductServiceTest {
 		QuotationResponse response = vendorService.activateVendor(APP_ADMIN, TEST_VENDOR_ID);
 		assertEquals(true, response.getVendor().isActiveIndicator());
 				
-		// Activate Test Vendor Admin  User
-		response = appUserService.activateAppUser(APP_ADMIN, APP_ADMIN_ID);
-		AppUser userVendorAdmin = response.getAppUser();
-		assertEquals(true, response.getAppUser().isActiveIndicator());
+		// Validate Vendor Admin		
+		AppUser userVendorAdmin = appUserRepository.findById(APP_ADMIN_ID).orElse(null);
+		assertEquals(true, userVendorAdmin.isActiveIndicator());
 		
 		response = productService.addVendorProduct(userVendorAdmin, TEST_PRODUCT);		
 		assertTrue("Product created.", response.getMessages().contains(new ReturnMessage("Product created.", ReturnMessage.MessageTypeEnum.INFO)));
@@ -108,7 +107,9 @@ public class ProductServiceTest {
 		
 		addVendorProductSuccessful();
 		
-		AppUser userVendorAdmin = appUserService.getAppUserById(APP_ADMIN_ID);
+		// Validate Vendor Admin		
+		AppUser userVendorAdmin = appUserRepository.findById(APP_ADMIN_ID).orElse(null);
+		assertEquals(true, userVendorAdmin.isActiveIndicator());
 		
 		QuotationResponse response = productService.addVendorProduct(userVendorAdmin, TEST_PRODUCT);
 		assertEquals(1, response.getMessages().size());
@@ -123,10 +124,9 @@ public class ProductServiceTest {
 		QuotationResponse response = vendorService.activateVendor(APP_ADMIN, TEST_VENDOR_ID);
 		assertEquals(true, response.getVendor().isActiveIndicator());
 				
-		// Activate Test Vendor Admin  User
-		response = appUserService.activateAppUser(APP_ADMIN, APP_ADMIN_ID);
-		AppUser userVendorAdmin = response.getAppUser();
-		assertEquals(true, response.getAppUser().isActiveIndicator());
+		// Validate Vendor Admin		
+		AppUser userVendorAdmin = appUserRepository.findById(APP_ADMIN_ID).orElse(null);
+		assertEquals(true, userVendorAdmin.isActiveIndicator());
 		
 		response = productService.addVendorProduct(userVendorAdmin, new Product("", "", "", ""));
 		assertEquals(2, response.getMessages().size());
@@ -139,7 +139,7 @@ public class ProductServiceTest {
 		
 		addVendorProductSuccessful();
 		
-		AppUser userVendorAdmin = appUserService.getAppUserById(APP_ADMIN_ID);
+		AppUser userVendorAdmin = appUserRepository.findById(APP_ADMIN_ID).orElse(null);
 		QuotationResponse response= productService.listProducts(userVendorAdmin, false);
 		
 		response = productService.updateVendorProduct(userVendorAdmin, new Product(response.getProducts().get(0).getId(), "TEST_VENDOR","Food New", "Product New", "imgLocation New"));
@@ -152,7 +152,7 @@ public class ProductServiceTest {
 		
 		addVendorProductSuccessful();
 		
-		AppUser userVendorAdmin = appUserService.getAppUserById(APP_ADMIN_ID);
+		AppUser userVendorAdmin = appUserRepository.findById(APP_ADMIN_ID).orElse(null);
 		
 		QuotationResponse response = productService.updateVendorProduct(userVendorAdmin, new Product("TEST", "TEST_VENDOR","Food", "Product", "imgLocation"));
 		assertTrue("Pproduct not found.", response.getMessages().contains(new ReturnMessage("Product not found.", ReturnMessage.MessageTypeEnum.ERROR)));
@@ -166,10 +166,9 @@ public class ProductServiceTest {
 		QuotationResponse response = vendorService.activateVendor(APP_ADMIN, vendors.get(0).getId());
 		assertEquals(true, response.getVendor().isActiveIndicator());
 				
-		// Activate Test Vendor Admin  User
-		response = appUserService.activateAppUser(APP_ADMIN, APP_ADMIN_ID);
-		AppUser userVendorAdmin = response.getAppUser();
-		assertEquals(true, response.getAppUser().isActiveIndicator());
+		// Validate Vendor Admin		
+		AppUser userVendorAdmin = appUserRepository.findById(APP_ADMIN_ID).orElse(null);
+		assertEquals(true, userVendorAdmin.isActiveIndicator());
 						
 		response = productService.updateVendorProduct(userVendorAdmin, new Product("", "", "", "", ""));
 		assertEquals(3, response.getMessages().size());
@@ -183,7 +182,7 @@ public class ProductServiceTest {
 		
 		addVendorProductSuccessful();
 		
-		AppUser userVendorAdmin = appUserService.getAppUserById(APP_ADMIN_ID);
+		AppUser userVendorAdmin = appUserRepository.findById(APP_ADMIN_ID).orElse(null);
 		
 		QuotationResponse response = productService.listProducts(userVendorAdmin, false);
 		
@@ -201,10 +200,9 @@ public class ProductServiceTest {
 		QuotationResponse response = vendorService.activateVendor(APP_ADMIN, vendors.get(0).getId());
 		assertEquals(true, response.getVendor().isActiveIndicator());
 				
-		// Activate Test Vendor Admin  User
-		response = appUserService.activateAppUser(APP_ADMIN, APP_ADMIN_ID);
-		AppUser userVendorAdmin = response.getAppUser();
-		assertEquals(true, response.getAppUser().isActiveIndicator());
+		// Validate Vendor Admin		
+		AppUser userVendorAdmin = appUserRepository.findById(APP_ADMIN_ID).orElse(null);
+		assertEquals(true, userVendorAdmin.isActiveIndicator());
 		
 		response = productService.activateVendorProduct(userVendorAdmin, "TEST");
 		assertEquals(1, response.getMessages().size());
@@ -216,7 +214,7 @@ public class ProductServiceTest {
 		
 		activateVendorProductSuccessfulTest();
 		
-		AppUser userVendorAdmin = appUserService.getAppUserById(APP_ADMIN_ID);
+		AppUser userVendorAdmin = appUserRepository.findById(APP_ADMIN_ID).orElse(null);
 		QuotationResponse response = productService.listProducts(userVendorAdmin, true);
 		
 		response = productService.activateVendorProduct(userVendorAdmin, response.getProducts().get(0).getId());
@@ -229,7 +227,7 @@ public class ProductServiceTest {
 		
 		activateVendorProductSuccessfulTest();
 		
-		AppUser userVendorAdmin = appUserService.getAppUserById(APP_ADMIN_ID);
+		AppUser userVendorAdmin = appUserRepository.findById(APP_ADMIN_ID).orElse(null);
 		
 		QuotationResponse response = productService.listProducts(userVendorAdmin, true);
 		
@@ -247,10 +245,9 @@ public class ProductServiceTest {
 		QuotationResponse response = vendorService.activateVendor(APP_ADMIN, vendors.get(0).getId());
 		assertEquals(true, response.getVendor().isActiveIndicator());
 				
-		// Activate Test Vendor Admin  User
-		response = appUserService.activateAppUser(APP_ADMIN, APP_ADMIN_ID);
-		AppUser userVendorAdmin = response.getAppUser();
-		assertEquals(true, response.getAppUser().isActiveIndicator());
+		// Validate Vendor Admin		
+		AppUser userVendorAdmin = appUserRepository.findById(APP_ADMIN_ID).orElse(null);
+		assertEquals(true, userVendorAdmin.isActiveIndicator());
 		
 		response = productService.deActivateVendorProduct(userVendorAdmin, "TEST");
 		assertEquals(1, response.getMessages().size());
@@ -262,7 +259,7 @@ public class ProductServiceTest {
 		
 		addVendorProductSuccessful();		
 		
-		AppUser userVendorAdmin = appUserService.getAppUserById(APP_ADMIN_ID);
+		AppUser userVendorAdmin = appUserRepository.findById(APP_ADMIN_ID).orElse(null);
 		
 		QuotationResponse response = productService.listProducts(userVendorAdmin, false);
 		
@@ -276,7 +273,7 @@ public class ProductServiceTest {
 	public void deleteVendorProductSuccessfulTest() {
 		
 		addVendorProductSuccessful();	
-		AppUser userVendorAdmin = appUserService.getAppUserById(APP_ADMIN_ID);
+		AppUser userVendorAdmin = appUserRepository.findById(APP_ADMIN_ID).orElse(null);
 		
 		QuotationResponse response = productService.listProducts(userVendorAdmin, false);
 		
@@ -292,10 +289,9 @@ public class ProductServiceTest {
 		QuotationResponse response = vendorService.activateVendor(APP_ADMIN, vendors.get(0).getId());
 		assertEquals(true, response.getVendor().isActiveIndicator());
 				
-		// Activate Test Vendor Admin  User
-		response = appUserService.activateAppUser(APP_ADMIN, APP_ADMIN_ID);
-		AppUser userVendorAdmin = response.getAppUser();
-		assertEquals(true, response.getAppUser().isActiveIndicator());
+		// Validate Vendor Admin		
+		AppUser userVendorAdmin = appUserRepository.findById(APP_ADMIN_ID).orElse(null);
+		assertEquals(true, userVendorAdmin.isActiveIndicator());
 				
 		response = productService.deleteVendorProduct(userVendorAdmin, "TEST");
 		assertEquals(1, response.getMessages().size());

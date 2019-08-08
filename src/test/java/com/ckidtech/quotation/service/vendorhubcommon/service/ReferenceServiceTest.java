@@ -15,16 +15,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.ckidtech.quotation.service.appuser.service.AppUserService;
 import com.ckidtech.quotation.service.core.controller.QuotationResponse;
+import com.ckidtech.quotation.service.core.dao.AppUserRepository;
 import com.ckidtech.quotation.service.core.model.AppUser;
 import com.ckidtech.quotation.service.core.model.ReferenceData;
 import com.ckidtech.quotation.service.core.model.ReturnMessage;
 import com.ckidtech.quotation.service.core.model.Vendor;
 import com.ckidtech.quotation.service.core.security.UserRole;
-import com.ckidtech.quotation.service.vendorhubcommon.service.ProductService;
-import com.ckidtech.quotation.service.vendorhubcommon.service.ReferenceDataService;
-import com.ckidtech.quotation.service.vendorhubcommon.service.VendorService;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {SpringMongoConfiguration.class})
@@ -37,10 +34,11 @@ public class ReferenceServiceTest {
 	private VendorService vendorService;
 	
 	@Autowired
-	private AppUserService appUserService;
+	private ProductService productService;
 	
 	@Autowired
-	private ProductService productService;
+	private AppUserRepository appUserRepository;
+	
 	
 	@Autowired
 	private ReferenceDataService referenceDataService;
@@ -54,9 +52,10 @@ public class ReferenceServiceTest {
 	
 	@Before
 	public  void initTest() {
-		vendorService.deleteAllVendors();
-		appUserService.deleteAllAppUser();
+		vendorService.deleteAllVendors();		
 		productService.deleteAllProducts();
+		appUserRepository.deleteAll();
+		
 		referenceDataService.deleteAllReferenceData();		
 		
 		USER_ADMIN.setActiveIndicator(true);
@@ -67,9 +66,11 @@ public class ReferenceServiceTest {
 		assertTrue("Vendor created.", response.getMessages().contains(new ReturnMessage("Vendor created.", ReturnMessage.MessageTypeEnum.INFO)));
 				
 		// Create Vendor Admin User
-		response = appUserService.addAppUser(USER_ADMIN, new AppUser("VENDOR_ADMIN", "Administrator", "testpass", UserRole.VENDOR_ADMIN, "VendorHub", "TEST", TEST_VENDOR_ID));	
-		VENDOR_ADMIN_ID = response.getAppUser().getId();
-		assertTrue("User created.", response.getMessages().contains(new ReturnMessage("User created.", ReturnMessage.MessageTypeEnum.INFO)));
+		AppUser appUserVendorAdmin = new AppUser("USER_VENDOR_ADMIN", "Administrator", "testpass", UserRole.VENDOR_ADMIN, "VendorHub", "TEST", TEST_VENDOR_ID);
+		appUserVendorAdmin.setActiveIndicator(true);
+		appUserRepository.save(appUserVendorAdmin);
+		VENDOR_ADMIN_ID = appUserVendorAdmin.getId();		
+		assertEquals(true, appUserVendorAdmin.isActiveIndicator());
 
 	}
 	
@@ -94,9 +95,8 @@ public class ReferenceServiceTest {
 		QuotationResponse response = vendorService.activateVendor(USER_ADMIN, TEST_VENDOR_ID);
 		assertEquals(true, response.getVendor().isActiveIndicator());
 				
-		// Activate Test Vendor Admin  User
-		response = appUserService.activateAppUser(USER_ADMIN, VENDOR_ADMIN_ID);
-		AppUser userVendorAdmin = response.getAppUser();
+		// Validate Vendor Admin		
+		AppUser userVendorAdmin = appUserRepository.findById(VENDOR_ADMIN_ID).orElse(null);
 		assertEquals(true, userVendorAdmin.isActiveIndicator());
 	
 		response = referenceDataService.createReferenceData(userVendorAdmin, 
@@ -118,7 +118,7 @@ public class ReferenceServiceTest {
 	@Test
 	public void createReferenceDataMissingMandatoryTest() {
 		
-		AppUser userVendorAdmin = appUserService.getAppUserById(VENDOR_ADMIN_ID);
+		AppUser userVendorAdmin = appUserRepository.findById(VENDOR_ADMIN_ID).orElse(null);
 		
 		QuotationResponse response = referenceDataService.createReferenceData(userVendorAdmin, 
 				new ReferenceData("", "", "", true));
@@ -135,7 +135,7 @@ public class ReferenceServiceTest {
 		createReferenceDataSuccefulTest();
 		
 		List<Vendor> vendors = vendorService.viewAllVendors();
-		AppUser userVendorAdmin = appUserService.getAppUserById(VENDOR_ADMIN_ID);
+		AppUser userVendorAdmin = appUserRepository.findById(VENDOR_ADMIN_ID).orElse(null);
 		
 		QuotationResponse response = referenceDataService.createReferenceData(userVendorAdmin, 
 				new ReferenceData(vendors.get(0).getId(), "ProductGroup", "Food", true));
@@ -150,7 +150,7 @@ public class ReferenceServiceTest {
 		createReferenceDataSuccefulTest();
 		
 		List<Vendor> vendors = vendorService.viewAllVendors();
-		AppUser userVendorAdmin = appUserService.getAppUserById(VENDOR_ADMIN_ID);
+		AppUser userVendorAdmin = appUserRepository.findById(VENDOR_ADMIN_ID).orElse(null);
 		
 		List<ReferenceData> listRef = referenceDataService.viewAllReferenceData();
 		
@@ -170,7 +170,7 @@ public class ReferenceServiceTest {
 	@Test
 	public void updateReferenceDataWithMissingMandatoryTest() {
 		
-		AppUser userVendorAdmin = appUserService.getAppUserById(VENDOR_ADMIN_ID);
+		AppUser userVendorAdmin = appUserRepository.findById(VENDOR_ADMIN_ID).orElse(null);
 		
 		QuotationResponse response = referenceDataService.updateReferenceData(userVendorAdmin, 
 				new ReferenceData("", "", "", "", true));
@@ -186,7 +186,7 @@ public class ReferenceServiceTest {
 	@Test
 	public void updateReferenceDataNoDataFoundTest() {
 		
-		AppUser userVendorAdmin = appUserService.getAppUserById(VENDOR_ADMIN_ID);
+		AppUser userVendorAdmin = appUserRepository.findById(VENDOR_ADMIN_ID).orElse(null);
 		
 		QuotationResponse response = referenceDataService.updateReferenceData(userVendorAdmin, 
 				new ReferenceData("TESTREF", userVendorAdmin.getObjectRef(), "ProductGroupNew", "Food New", false));
