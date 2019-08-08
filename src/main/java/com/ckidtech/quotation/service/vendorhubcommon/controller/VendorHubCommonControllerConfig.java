@@ -56,10 +56,10 @@ public class VendorHubCommonControllerConfig {
 	}
 	*/
 	
-	@RequestMapping(value = "/config/admin/createreferencedata", method = RequestMethod.POST)
+	@RequestMapping(value = "/config/appadmin/createreferencedata", method = RequestMethod.POST)
 	public ResponseEntity<Object> createReferenceData(@RequestHeader("authorization") String authorization,
 			@RequestBody ReferenceData refData) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /config/admin/createreferencedata");
+		LOG.log(Level.INFO, "Calling API /config/appadmin/createreferencedata");
 		
 		AppUser loginUser = new AppUser(authorization);		
 		Util.checkAccessGrant(loginUser, UserRole.APP_ADMIN, null);
@@ -67,10 +67,10 @@ public class VendorHubCommonControllerConfig {
 	}
 	
 	
-	@RequestMapping(value = "/config/admin/createreferencedatamultiple", method = RequestMethod.POST)
+	@RequestMapping(value = "/config/appadmin/createreferencedatamultiple", method = RequestMethod.POST)
 	public ResponseEntity<Object> createReferenceDataMultiple(@RequestHeader("authorization") String authorization,
 			@RequestBody ReferenceData[] refDataMutiple) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /config/admin/createreferencedatamultiple");
+		LOG.log(Level.INFO, "Calling API /config/appadmin/createreferencedatamultiple");
 		
 		AppUser loginUser = new AppUser(authorization);		
 		Util.checkAccessGrant(loginUser, UserRole.APP_ADMIN, null);
@@ -83,30 +83,30 @@ public class VendorHubCommonControllerConfig {
 	
 	// Service for VENDOR only
 	
-	@RequestMapping(value = "/config/vendor/createreferencedata", method = RequestMethod.POST)
+	@RequestMapping(value = "/config/vendoradmin/createreferencedata", method = RequestMethod.POST)
 	public ResponseEntity<Object> createReferenceDataByVendor(@RequestHeader("authorization") String authorization,
 			@RequestBody ReferenceData refData) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /config/vendor/createreferencedata");
+		LOG.log(Level.INFO, "Calling API /config/vendoradmin/createreferencedata");
 		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(referenceDataService.createReferenceData(loginUser, refData), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/config/vendor/updatereferencedata", method = RequestMethod.POST)
+	@RequestMapping(value = "/config/vendoradmin/updatereferencedata", method = RequestMethod.POST)
 	public ResponseEntity<Object> updateReferenceDataByVendor(@RequestHeader("authorization") String authorization,
 			@RequestBody ReferenceData refData) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /config/vendor/updatereferencedata");		
+		LOG.log(Level.INFO, "Calling API /config/vendoradmin/updatereferencedata");		
 		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(referenceDataService.updateReferenceData(loginUser, refData), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/config/vendor/viewreferencedatabygroup/{refGroup}")
+	@RequestMapping(value = "/config/vendoradmin/viewreferencedatabygroup/{refGroup}")
 	public ResponseEntity<Object> viewReferenceDataByGroupByVendor(@RequestHeader("authorization") String authorization,
 			@PathVariable("refGroup") String refGroup) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /config/vendor/viewreferencedatabygroup");
+		LOG.log(Level.INFO, "Calling API /config/vendoradmin/viewreferencedatabygroup");
 
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
@@ -116,10 +116,10 @@ public class VendorHubCommonControllerConfig {
 	
 	// Service for USER only
 		
-	@RequestMapping(value = "/config/user/viewreferencedatabygroup/{refGroup}")
+	@RequestMapping(value = "/config/vendoruser/viewreferencedatabygroup/{refGroup}")
 	public ResponseEntity<Object> viewReferenceDataByGroupByUser(@RequestHeader("authorization") String authorization,
 			@PathVariable("refGroup") String refGroup) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /config/user/viewreferencedatabygroup");
+		LOG.log(Level.INFO, "Calling API /config/vendoruser/viewreferencedatabygroup");
 		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);

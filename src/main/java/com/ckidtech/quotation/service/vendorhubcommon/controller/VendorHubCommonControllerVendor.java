@@ -34,50 +34,50 @@ public class VendorHubCommonControllerVendor {
 	
 	// Admin services
 	
-	@RequestMapping(value = "/vendor/admin/viewallvendors")
+	@RequestMapping(value = "/vendor/appadmin/viewallvendors")
 	public ResponseEntity<Object> viewAllVendors(@RequestHeader("authorization") String authorization) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /vendor/admin/viewallvendors");
+		LOG.log(Level.INFO, "Calling API /vendor/appadmin/viewallvendors");
 		Util.checkAccessGrant(new AppUser(authorization), UserRole.APP_ADMIN, null);
 		return new ResponseEntity<Object>(vendorService.viewAllVendors(), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/vendor/admin/viewactivevendors")
+	@RequestMapping(value = "/vendor/appadmin/viewactivevendors")
 	public ResponseEntity<Object> viewActiveVendors(@RequestHeader("authorization") String authorization) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /vendor/admin/viewactivevendors");
+		LOG.log(Level.INFO, "Calling API /vendor/appadmin/viewactivevendors");
 		Util.checkAccessGrant(new AppUser(authorization), UserRole.APP_ADMIN, null);
 		return new ResponseEntity<Object>(vendorService.viewActiveVendors(), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/vendor/admin/searchvendorbyname/{name}")
+	@RequestMapping(value = "/vendor/appadmin/searchvendorbyname/{name}")
 	public ResponseEntity<Object> searchVendorsByName(@RequestHeader("authorization") String authorization, 
 			@PathVariable("name") String name) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /vendor/admin/searchvendorbyname");
+		LOG.log(Level.INFO, "Calling API /vendor/appadmin/searchvendorbyname");
 		Util.checkAccessGrant(new AppUser(authorization), UserRole.APP_ADMIN, null);
 		return new ResponseEntity<Object>(vendorService.searchVendors(name), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/vendor/admin/getvendorbyid/{id}")
+	@RequestMapping(value = "/vendor/appadmin/getvendorbyid/{id}")
 	public ResponseEntity<Object> getVendorById(@RequestHeader("authorization") String authorization, 
 			@PathVariable("id") String id) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /vendor/admin/getvendorbyid");
+		LOG.log(Level.INFO, "Calling API /vendor/appadmin/getvendorbyid");
 		Util.checkAccessGrant(new AppUser(authorization), UserRole.APP_ADMIN, null);
 		return new ResponseEntity<Object>(vendorService.getVendorById(id), HttpStatus.OK);		
 	}
 		
-	@RequestMapping(value = "/vendor/admin/createvendor", method = RequestMethod.POST)
+	@RequestMapping(value = "/vendor/appadmin/createvendor", method = RequestMethod.POST)
 	public ResponseEntity<Object> createVendor(@RequestHeader("authorization") String authorization, 
 			@RequestBody Vendor vendor) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /vendor/admin/createvendor:" + vendor + ")");
+		LOG.log(Level.INFO, "Calling API /vendor/appadmin/createvendor:" + vendor + ")");
 		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.APP_ADMIN, null);
 		return new ResponseEntity<Object>(vendorService.addVendor(loginUser, vendor), HttpStatus.CREATED);		
 	}
 	
-	@RequestMapping(value = "/vendor/admin/createvendors", method = RequestMethod.POST)
+	@RequestMapping(value = "/vendor/appadmin/createvendors", method = RequestMethod.POST)
 	public ResponseEntity<Object> createVendors(@RequestHeader("authorization") String authorization, 
 			@RequestBody Vendor[] vendors) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /vendor/admin/createvendors");
+		LOG.log(Level.INFO, "Calling API /vendor/appadmin/createvendors");
 		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.APP_ADMIN, null);
@@ -89,20 +89,20 @@ public class VendorHubCommonControllerVendor {
 		return new ResponseEntity<Object>(quotations, HttpStatus.CREATED);		
 	}
 	
-	@RequestMapping(value = "/vendor/admin/updatevendor", method = RequestMethod.POST)
+	@RequestMapping(value = "/vendor/appadmin/updatevendor", method = RequestMethod.POST)
 	public ResponseEntity<Object> updateVendor(@RequestHeader("authorization") String authorization, 
 			@RequestBody Vendor vendor) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /vendor/admin/updatevendor:" + vendor + ")");	
+		LOG.log(Level.INFO, "Calling API /vendor/appadmin/updatevendor:" + vendor + ")");	
 		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.APP_ADMIN, null);
 		return new ResponseEntity<Object>(vendorService.updateVendor(loginUser, vendor), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/vendor/admin/activatevendor/{vendorCode}")
+	@RequestMapping(value = "/vendor/appadmin/activatevendor/{vendorCode}")
 	public ResponseEntity<Object> activateVendor(@RequestHeader("authorization") String authorization, 
 			@PathVariable("vendorCode") String vendorCode) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /vendor/admin/activateevendor:" + vendorCode + ")");
+		LOG.log(Level.INFO, "Calling API /vendor/appadmin/activateevendor:" + vendorCode + ")");
 		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.APP_ADMIN, null);
@@ -120,10 +120,10 @@ public class VendorHubCommonControllerVendor {
 		return new ResponseEntity<Object>(vendorService.deActivateVendor(loginUser, vendorCode), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/vendor/admin/deletevendor/{vendorCode}")
+	@RequestMapping(value = "/vendor/appadmin/deletevendor/{vendorCode}")
 	public ResponseEntity<Object> deleteVendor(@RequestHeader("authorization") String authorization, 
 			@PathVariable("vendorCode") String vendorCode) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /vendor/admin/deactivateevendor:" + vendorCode + ")");
+		LOG.log(Level.INFO, "Calling API /vendor/appadmin/deactivateevendor:" + vendorCode + ")");
 		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.APP_ADMIN, null);
@@ -132,19 +132,19 @@ public class VendorHubCommonControllerVendor {
 	
 	// Vendor Services
 	
-	@RequestMapping(value = "/vendor/vendor/getvendorbyid")
+	@RequestMapping(value = "/vendor/vendoradmin/getvendorbyid")
 	public ResponseEntity<Object> getVendorByIdByVendor(@RequestHeader("authorization") String authorization) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /vendor/vendor/getvendorbyid");
+		LOG.log(Level.INFO, "Calling API /vendor/vendoradmin/getvendorbyid");
 		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(vendorService.getVendorById(loginUser.getObjectRef()), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/vendor/vendor/updatevendor", method = RequestMethod.POST)
+	@RequestMapping(value = "/vendor/vendoradmin/updatevendor", method = RequestMethod.POST)
 	public ResponseEntity<Object> updateVendorByVendor(@RequestHeader("authorization") String authorization, 
 			@RequestBody Vendor vendor) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /vendor/vendor/updatevendor:" + vendor + ")");		
+		LOG.log(Level.INFO, "Calling API /vendor/vendoradmin/updatevendor:" + vendor + ")");		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, vendor.getId());
 		return new ResponseEntity<Object>(vendorService.updateVendor(loginUser, vendor), HttpStatus.OK);		

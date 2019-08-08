@@ -31,86 +31,86 @@ public class VendorHubCommonControllerProduct {
 	@Autowired
 	private ProductService productService;
 	
-	@RequestMapping(value = "/product/vendor/listactiveproducts")
+	@RequestMapping(value = "/product/vendoradmin/listactiveproducts")
 	public ResponseEntity<Object> findActiveProducts(@RequestHeader("authorization") String authorization) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/listactiveproducts");	
+		LOG.log(Level.INFO, "Calling API /product/vendoradmin/listactiveproducts");	
 		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);	
 		return new ResponseEntity<Object>(productService.listProducts(loginUser, true), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/product/vendor/listinactiveproducts")
+	@RequestMapping(value = "/product/vendoradmin/listinactiveproducts")
 	public ResponseEntity<Object> finInActiveProducts(@RequestHeader("authorization") String authorization) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/listinactiveproducts");	
+		LOG.log(Level.INFO, "Calling API /product/vendoradmin/listinactiveproducts");	
 
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);	
 		return new ResponseEntity<Object>(productService.listProducts(loginUser, false), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/product/vendor/listactiveproductsbygroup")
+	@RequestMapping(value = "/product/vendoradmin/listactiveproductsbygroup")
 	public ResponseEntity<Object> findActiveProductsByGroup(@RequestHeader("authorization") String authorization) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/listactiveproductsbygroup");	
+		LOG.log(Level.INFO, "Calling API /product/vendoradmin/listactiveproductsbygroup");	
 		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(productService.listProductsByGroup(loginUser, true), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/product/vendor/listinactiveproductsbygroup")
+	@RequestMapping(value = "/product/vendoradmin/listinactiveproductsbygroup")
 	public ResponseEntity<Object> findInActiveProductsByGroup(@RequestHeader("authorization") String authorization) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/listinactiveproductsbygroup");	
+		LOG.log(Level.INFO, "Calling API /product/vendoradmin/listinactiveproductsbygroup");	
 		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(productService.listProductsByGroup(loginUser, false), HttpStatus.OK);		
 	}
 		
-	@RequestMapping(value = "/product/vendor/createproduct", method = RequestMethod.POST)
+	@RequestMapping(value = "/product/vendoradmin/createproduct", method = RequestMethod.POST)
 	public ResponseEntity<Object> createProduct(@RequestHeader("authorization") String authorization, 
 			@RequestBody Product product) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/createproduct:" + product + ")");	
+		LOG.log(Level.INFO, "Calling API /product/vendoradmin/createproduct:" + product + ")");	
 		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, product.getVendorCode());		
 		return new ResponseEntity<Object>(productService.addVendorProduct(loginUser, product), HttpStatus.CREATED);		
 	}
 	
-	@RequestMapping(value = "/product/vendor/updateproduct", method = RequestMethod.POST)
+	@RequestMapping(value = "/product/vendoradmin/updateproduct", method = RequestMethod.POST)
 	public ResponseEntity<Object> updateProduct(@RequestHeader("authorization") String authorization,
 			@RequestBody Product product) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/updateproduct:" + product + ")");
+		LOG.log(Level.INFO, "Calling API /product/vendoradmin/updateproduct:" + product + ")");
 		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, product.getVendorCode());				
 		return new ResponseEntity<Object>(productService.updateVendorProduct(loginUser, product), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/product/vendor/activateproduct/{productId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/product/vendoradmin/activateproduct/{productId}", method = RequestMethod.POST)
 	public ResponseEntity<Object> activateProduct(@RequestHeader("authorization") String authorization,
 			@PathVariable("productId") String productId) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/activateproduct/" + productId + ")");
+		LOG.log(Level.INFO, "Calling API /product/vendoradmin/activateproduct/" + productId + ")");
 		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(productService.activateVendorProduct(loginUser, productId), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/product/vendor/deactivateproduct/{productId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/product/vendoradmin/deactivateproduct/{productId}", method = RequestMethod.POST)
 	public ResponseEntity<Object> deActivateProduct(@RequestHeader("authorization") String authorization,
 			@PathVariable("productId") String productId) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/deactivateproduct/" + productId + ")");
+		LOG.log(Level.INFO, "Calling API /product/vendoradmin/deactivateproduct/" + productId + ")");
 
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(productService.deActivateVendorProduct(loginUser, productId), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/product/vendor/createproducts", method = RequestMethod.POST)
+	@RequestMapping(value = "/product/vendoradmin/createproducts", method = RequestMethod.POST)
 	public ResponseEntity<Object> createProducts(@RequestHeader("authorization") String authorization,
 			@RequestBody Product[] products) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/createproducts:" + products + ")");	
+		LOG.log(Level.INFO, "Calling API /product/vendoradmin/createproducts:" + products + ")");	
 		ArrayList<QuotationResponse> quotations = new ArrayList<QuotationResponse>();  
 		
 		AppUser loginUser = new AppUser(authorization);
@@ -121,10 +121,10 @@ public class VendorHubCommonControllerProduct {
 		return new ResponseEntity<Object>(quotations, HttpStatus.CREATED);		
 	}
 		
-	@RequestMapping(value = "/product/vendor/deletevendorproduct/{productId}")
+	@RequestMapping(value = "/product/vendoradmin/deletevendorproduct/{productId}")
 	public ResponseEntity<Object> deleteVendorProduct(@RequestHeader("authorization") String authorization,
 			@PathVariable("productId") String productId) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /product/vendor/deletevendorproduct/" + productId);
+		LOG.log(Level.INFO, "Calling API /product/vendoradmin/deletevendorproduct/" + productId);
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(productService.deleteVendorProduct(loginUser, productId), HttpStatus.OK);		
