@@ -1,4 +1,4 @@
-package com.ckidtech.quotation.service.app.service;
+package com.ckidtech.quotation.service.vendorhubcommon.service;
 
 import java.util.ArrayList;
 import java.util.List;

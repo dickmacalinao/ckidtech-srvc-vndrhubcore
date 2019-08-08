@@ -1,4 +1,4 @@
-package com.ckidtech.quotation.service.app.controller;
+package com.ckidtech.quotation.service.vendorhubcommon.controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,18 +16,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ckidtech.quotation.service.app.service.ReferenceDataService;
 import com.ckidtech.quotation.service.core.controller.QuotationResponse;
 import com.ckidtech.quotation.service.core.model.AppUser;
 import com.ckidtech.quotation.service.core.model.ReferenceData;
 import com.ckidtech.quotation.service.core.security.UserRole;
 import com.ckidtech.quotation.service.core.utils.Util;
+import com.ckidtech.quotation.service.vendorhubcommon.service.ReferenceDataService;
 
 @ComponentScan({"com.ckidtech.quotation.service.core.service"})
 @RestController
-public class QuotationControllerConfig {
+public class VendorHubCommonControllerConfig {
 	
-	private static final Logger LOG = Logger.getLogger(QuotationControllerConfig.class.getName());
+	private static final Logger LOG = Logger.getLogger(VendorHubCommonControllerConfig.class.getName());
 	
 	@Autowired
 	private ReferenceDataService referenceDataService;

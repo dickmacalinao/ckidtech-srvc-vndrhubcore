@@ -1,4 +1,4 @@
-package com.ckidtech.quotation.service.app.controller;
+package com.ckidtech.quotation.service.vendorhubcommon.controller;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -20,13 +20,13 @@ import com.ckidtech.quotation.service.core.model.AppUser;
 import com.ckidtech.quotation.service.core.model.Product;
 import com.ckidtech.quotation.service.core.security.UserRole;
 import com.ckidtech.quotation.service.core.utils.Util;
-import com.ckidtech.quotation.service.app.service.ProductService;
+import com.ckidtech.quotation.service.vendorhubcommon.service.ProductService;
 
 @ComponentScan({"com.ckidtech.quotation.service.core.service"})
 @RestController
-public class QuotationControllerProduct {
+public class VendorHubCommonControllerProduct {
 	
-	private static final Logger LOG = Logger.getLogger(QuotationControllerProduct.class.getName());
+	private static final Logger LOG = Logger.getLogger(VendorHubCommonControllerProduct.class.getName());
 	
 	@Autowired
 	private ProductService productService;

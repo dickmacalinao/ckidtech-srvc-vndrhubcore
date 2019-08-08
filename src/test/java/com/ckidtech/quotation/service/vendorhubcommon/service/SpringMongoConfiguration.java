@@ -1,4 +1,4 @@
-package com.ckidtech.quotation.service.app.test.service;
+package com.ckidtech.quotation.service.vendorhubcommon.service;
 
 import com.mongodb.MongoClient;
 import org.springframework.context.annotation.Bean;

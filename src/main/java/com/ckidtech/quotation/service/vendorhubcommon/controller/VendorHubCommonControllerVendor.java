@@ -1,4 +1,4 @@
-package com.ckidtech.quotation.service.app.controller;
+package com.ckidtech.quotation.service.vendorhubcommon.controller;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -15,18 +15,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ckidtech.quotation.service.app.service.VendorService;
 import com.ckidtech.quotation.service.core.controller.QuotationResponse;
 import com.ckidtech.quotation.service.core.model.AppUser;
 import com.ckidtech.quotation.service.core.model.Vendor;
 import com.ckidtech.quotation.service.core.security.UserRole;
 import com.ckidtech.quotation.service.core.utils.Util;
+import com.ckidtech.quotation.service.vendorhubcommon.service.VendorService;
 
 @ComponentScan({"com.ckidtech.quotation.service.core.service"})
 @RestController
-public class QuotationControllerVendor {
+public class VendorHubCommonControllerVendor {
 	
-	private static final Logger LOG = Logger.getLogger(QuotationControllerVendor.class.getName());
+	private static final Logger LOG = Logger.getLogger(VendorHubCommonControllerVendor.class.getName());
 	
 	@Autowired
 	private VendorService vendorService;

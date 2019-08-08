@@ -1,4 +1,4 @@
-package com.ckidtech.quotation.service.app.test.service;
+package com.ckidtech.quotation.service.vendorhubcommon.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -15,16 +15,16 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.ckidtech.quotation.service.app.service.VendorService;
 import com.ckidtech.quotation.service.core.controller.QuotationResponse;
 import com.ckidtech.quotation.service.core.model.AppUser;
 import com.ckidtech.quotation.service.core.model.ReturnMessage;
 import com.ckidtech.quotation.service.core.model.Vendor;
-import com.ckidtech.quotation.service.core.security.UserRole;;
+import com.ckidtech.quotation.service.core.security.UserRole;
+import com.ckidtech.quotation.service.vendorhubcommon.service.VendorService;;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {SpringMongoConfiguration.class})
-@ComponentScan({"com.ckidtech.quotation.service.app.service"})
+@ComponentScan({"com.ckidtech.quotation.service.vendorhubcommon.service"})
 @AutoConfigureDataMongo
 public class VendorServiceTest {
 	

@@ -1,4 +1,4 @@
-package com.ckidtech.quotation.service.app.service;
+package com.ckidtech.quotation.service.vendorhubcommon.service;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,12 +30,6 @@ public class VendorService {
 
 	@Autowired
 	private VendorRepository vendorRepository;
-	
-	//@Autowired
-	//private AppUserService appUserService;
-	
-	//@Autowired
-	//private ProductService productService;
 
 	@Autowired
 	private MessageController msgController;
