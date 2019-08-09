@@ -99,6 +99,7 @@ public class ReferenceDataService {
 
 			if (quotation.getMessages().isEmpty()) {
 				Util.initalizeCreatedInfo(refData, loginUser.getUsername(), msgController.getMsg("info.RDRC"));
+				refData.setId(null);
 				refData.setActiveIndicator(true);
 				referenceDataRepository.save(refData);		
 				

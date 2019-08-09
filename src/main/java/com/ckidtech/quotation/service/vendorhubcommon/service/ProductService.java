@@ -135,6 +135,7 @@ public class ProductService {
 				quotation.addMessage(msgController.createMsg("error.VPAEE"));						
 			} else {
 				Util.initalizeCreatedInfo(product, loginUser.getUsername(), msgController.getMsg("info.VPRC"));
+				product.setId(null);
 				product.setActiveIndicator(false);
 				product.setVendorCode(loginUser.getObjectRef());
 				productRepository.save(product);					
@@ -179,7 +180,7 @@ public class ProductService {
 				// Check if same Name exists
 				List<Product> listPord = productRepository.searchProductsByNameOnly(loginUser.getObjectRef(), product.getName());				
 				for ( Product prod : listPord ) {
-					if ( prod.getName().equalsIgnoreCase(product.getName()) && prod.getId().equalsIgnoreCase(product.getId()) ) {
+					if ( prod.getId().equalsIgnoreCase(product.getId()) ) {
 						quotation.addMessage(msgController.createMsg("error.VPAEE"));
 					}					
 				}

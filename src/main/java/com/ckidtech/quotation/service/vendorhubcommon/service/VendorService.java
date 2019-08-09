@@ -106,6 +106,7 @@ public class VendorService {
 				quotation.addMessage(msgController.createMsg("error.VAEE"));
 			} else {				
 				Util.initalizeCreatedInfo(vendor, appUser.getUsername(), msgController.getMsg("info.VRC"));
+				vendor.setId(null);
 				vendor.setActiveIndicator(false);
 				vendorRepository.save(vendor);
 				quotation.setVendor(vendor);

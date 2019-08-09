@@ -43,7 +43,7 @@ public class ReferenceServiceTest {
 	@Autowired
 	private ReferenceDataService referenceDataService;
 	
-	public static AppUser USER_ADMIN = new AppUser("USER_ADMIN", "Administrator", "testpass", UserRole.APP_ADMIN, "VendorHub", "", "");		
+	public static AppUser USER_ADMIN = new AppUser("USER_ADMIN", "Administrator", "testpass", UserRole.APP_ADMIN, "VendorHub", "");		
 	
 	public static Vendor TEST_VENDOR = new Vendor("Test Vendor", "Address", "9999999999", "imagelink");	
 	
@@ -66,7 +66,7 @@ public class ReferenceServiceTest {
 		assertTrue("Vendor created.", response.getMessages().contains(new ReturnMessage("Vendor created.", ReturnMessage.MessageTypeEnum.INFO)));
 				
 		// Create Vendor Admin User
-		AppUser appUserVendorAdmin = new AppUser("USER_VENDOR_ADMIN", "Administrator", "testpass", UserRole.VENDOR_ADMIN, "VendorHub", "TEST", TEST_VENDOR_ID);
+		AppUser appUserVendorAdmin = new AppUser("USER_VENDOR_ADMIN", "Administrator", "testpass", UserRole.VENDOR_ADMIN, "VendorHub", TEST_VENDOR_ID);
 		appUserVendorAdmin.setActiveIndicator(true);
 		appUserRepository.save(appUserVendorAdmin);
 		VENDOR_ADMIN_ID = appUserVendorAdmin.getId();		

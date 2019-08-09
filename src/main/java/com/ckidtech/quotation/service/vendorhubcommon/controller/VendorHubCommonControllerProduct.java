@@ -31,6 +31,8 @@ public class VendorHubCommonControllerProduct {
 	@Autowired
 	private ProductService productService;
 	
+	// Vendor Admin services
+	
 	@RequestMapping(value = "/product/vendoradmin/listactiveproducts")
 	public ResponseEntity<Object> findActiveProducts(@RequestHeader("authorization") String authorization) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /product/vendoradmin/listactiveproducts");	
@@ -128,6 +130,17 @@ public class VendorHubCommonControllerProduct {
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(productService.deleteVendorProduct(loginUser, productId), HttpStatus.OK);		
+	}
+	
+	// Vendor User services
+	
+	@RequestMapping(value = "/product/vendoruser/listactiveproducts")
+	public ResponseEntity<Object> vendorUserFindActiveProducts(@RequestHeader("authorization") String authorization) throws Exception {		
+		LOG.log(Level.INFO, "Calling API /product/vendoruser/listactiveproducts");	
+		
+		AppUser loginUser = new AppUser(authorization);
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_USER, null);	
+		return new ResponseEntity<Object>(productService.listProducts(loginUser, true), HttpStatus.OK);		
 	}
 	
 }
