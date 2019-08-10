@@ -89,7 +89,7 @@ public class VendorHubCommonControllerProduct {
 		return new ResponseEntity<Object>(productService.updateVendorProduct(loginUser, product), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/product/vendoradmin/activateproduct/{productId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/product/vendoradmin/activateproduct/{productId}")
 	public ResponseEntity<Object> activateProduct(@RequestHeader("authorization") String authorization,
 			@PathVariable("productId") String productId) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /product/vendoradmin/activateproduct/" + productId + ")");
@@ -99,7 +99,7 @@ public class VendorHubCommonControllerProduct {
 		return new ResponseEntity<Object>(productService.activateVendorProduct(loginUser, productId), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/product/vendoradmin/deactivateproduct/{productId}", method = RequestMethod.POST)
+	@RequestMapping(value = "/product/vendoradmin/deactivateproduct/{productId}")
 	public ResponseEntity<Object> deActivateProduct(@RequestHeader("authorization") String authorization,
 			@PathVariable("productId") String productId) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /product/vendoradmin/deactivateproduct/" + productId + ")");
@@ -141,6 +141,15 @@ public class VendorHubCommonControllerProduct {
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_USER, null);	
 		return new ResponseEntity<Object>(productService.listProducts(loginUser, true), HttpStatus.OK);		
+	}
+	
+	@RequestMapping(value = "/product/vendoruser/listactiveproductsbygroup")
+	public ResponseEntity<Object> vendorUserfindActiveProductsByGroup(@RequestHeader("authorization") String authorization) throws Exception {		
+		LOG.log(Level.INFO, "Calling API /product/vendoradmin/listactiveproductsbygroup");	
+		
+		AppUser loginUser = new AppUser(authorization);
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_USER, null);
+		return new ResponseEntity<Object>(productService.listProductsByGroup(loginUser, true), HttpStatus.OK);		
 	}
 	
 }

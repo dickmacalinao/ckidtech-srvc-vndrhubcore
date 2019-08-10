@@ -78,12 +78,16 @@ public class ProductService {
 		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "grantTo", "value");
 		List<ReferenceData> groups =  referenceDataRepository.searchByRoleAndRefGroup(loginUser.getObjectRef(), "ProductGroup", pageable);
 		int index = 0;
+		List<Product> products;
 		for ( ReferenceData group : groups ) {
 			prodGroup = new ProductGroup();
 			prodGroup.setTitle(group.getValue());			
-			prodGroup.setKey(group.getValue() + index);
-			prodGroup.setProducts(productRepository.listProductsByGroup(loginUser.getObjectRef(), flag, group.getValue()));
-			prodGroups.add(prodGroup);
+			prodGroup.setKey(group.getValue() + index);			
+			products = productRepository.listProductsByGroup(loginUser.getObjectRef(), flag, group.getValue());
+			if ( products.size()>0 ) {
+				prodGroup.setProducts(productRepository.listProductsByGroup(loginUser.getObjectRef(), flag, group.getValue()));
+				prodGroups.add(prodGroup);
+			}			
 			index++;
 		}
 		
@@ -180,7 +184,7 @@ public class ProductService {
 				// Check if same Name exists
 				List<Product> listPord = productRepository.searchProductsByNameOnly(loginUser.getObjectRef(), product.getName());				
 				for ( Product prod : listPord ) {
-					if ( prod.getId().equalsIgnoreCase(product.getId()) ) {
+					if ( !prod.getId().equalsIgnoreCase(product.getId()) ) {
 						quotation.addMessage(msgController.createMsg("error.VPAEE"));
 					}					
 				}
