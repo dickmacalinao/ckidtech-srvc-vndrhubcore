@@ -79,6 +79,8 @@ public class ReferenceDataService {
 		LOG.log(Level.INFO, "Calling AppConfig Service createReferenceData()");
 		
 		QuotationResponse quotation = new QuotationResponse();
+		quotation.setProcessSuccessful(false);
+		
 		if (refData.getGrantTo() == null || "".equals(refData.getGrantTo()))
 			quotation.addMessage(msgController.createMsg("error.MFE", "Grant To"));
 		if (refData.getRefGroup() == null || "".equals(refData.getRefGroup()))
@@ -105,6 +107,7 @@ public class ReferenceDataService {
 				
 				quotation.setReferenceData(refData);
 				quotation.addMessage(msgController.createMsg("info.RDRC"));
+				quotation.setProcessSuccessful(true);
 			}
 		}
 		
@@ -117,6 +120,8 @@ public class ReferenceDataService {
 		LOG.log(Level.INFO, "Calling AppConfig Service updateReferenceData()");
 		
 		QuotationResponse quotation = new QuotationResponse();
+		quotation.setProcessSuccessful(false);
+		
 		if (refData.getId() == null || "".equals(refData.getId()))
 			quotation.addMessage(msgController.createMsg("error.MFE", "ID"));
 		if (refData.getGrantTo() == null || "".equals(refData.getGrantTo()))
@@ -142,6 +147,7 @@ public class ReferenceDataService {
 				
 				quotation.setReferenceData(refData);
 				quotation.addMessage(msgController.createMsg("info.RDRU"));
+				quotation.setProcessSuccessful(true);
 			}
 		}
 		
@@ -157,6 +163,8 @@ public class ReferenceDataService {
 		LOG.log(Level.INFO, "Calling AppConfig Service deleteReferenceData()");
 		
 		QuotationResponse quotation = new QuotationResponse();
+		quotation.setProcessSuccessful(false);
+		
 		if (grantTo == null || "".equals(grantTo))
 			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));
 		if (refId == null || "".equals(refId))
@@ -183,6 +191,7 @@ public class ReferenceDataService {
 			if ( quotation.getMessages().isEmpty() ) {	
 				referenceDataRepository.delete(refRep);	
 				quotation.addMessage(msgController.createMsg("info.RDRC"));
+				quotation.setProcessSuccessful(true);
 			}
 			
 		}
@@ -232,6 +241,7 @@ public class ReferenceDataService {
 		QuotationResponse quotation = new QuotationResponse();
 		referenceDataRepository.deleteAll();
 		quotation.addMessage(msgController.createMsg("info.RDSD"));
+		quotation.setProcessSuccessful(true);
 		return quotation;
 
 	}

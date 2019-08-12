@@ -90,6 +90,7 @@ public class VendorService {
 		Util.checkIfAlreadyActivated(appUser);
 
 		QuotationResponse quotation = new QuotationResponse();
+		quotation.setProcessSuccessful(false);
 
 		if (vendor.getName() == null || "".equals(vendor.getName()))
 			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Name"));
@@ -111,6 +112,7 @@ public class VendorService {
 				vendorRepository.save(vendor);
 				quotation.setVendor(vendor);
 				quotation.addMessage(msgController.createMsg("info.VRC"));
+				quotation.setProcessSuccessful(true);
 			}
 
 		}
@@ -131,6 +133,7 @@ public class VendorService {
 		Util.checkIfAlreadyActivated(appUser);
 
 		QuotationResponse quotation = new QuotationResponse();
+		quotation.setProcessSuccessful(false);
 
 		if (vendor.getId() == null || "".equals(vendor.getId()))
 			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));
@@ -159,6 +162,7 @@ public class VendorService {
 				vendorRepository.save(vendorRep);
 				quotation.addMessage(msgController.createMsg("info.VRU"));
 				quotation.setVendor(vendorRep);
+				quotation.setProcessSuccessful(true);
 			}
 
 		}
@@ -177,6 +181,7 @@ public class VendorService {
 		QuotationResponse quotation = new QuotationResponse();
 		vendorRepository.deleteAll();
 		quotation.addMessage(msgController.createMsg("info.AVSD"));
+		quotation.setProcessSuccessful(true);
 		return quotation;
 
 	}
@@ -193,9 +198,11 @@ public class VendorService {
 		Util.checkIfAlreadyActivated(appUser);
 		
 		QuotationResponse quotation = new QuotationResponse();
+		quotation.setProcessSuccessful(false);
 
-		if (vendorID == null || "".equals(vendorID))
+		if (vendorID == null || "".equals(vendorID)) {
 			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));
+		}
 
 		if (quotation.getMessages().isEmpty()) {
 
@@ -210,6 +217,7 @@ public class VendorService {
 				
 				vendorRepository.delete(vendorRep);
 				quotation.addMessage(msgController.createMsg("info.VRD"));
+				quotation.setProcessSuccessful(true);
 
 			}
 			quotation.setVendor(vendorRep);
@@ -232,9 +240,11 @@ public class VendorService {
 		Util.checkIfAlreadyActivated(appUser);
 
 		QuotationResponse quotation = new QuotationResponse();
+		quotation.setProcessSuccessful(false);
 
-		if (vendorID == null || "".equals(vendorID))
+		if (vendorID == null || "".equals(vendorID)) {
 			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));
+		}
 
 		if (quotation.getMessages().isEmpty()) {
 
@@ -250,7 +260,8 @@ public class VendorService {
 					vendorRep.setActiveIndicator(true);
 					Util.initalizeUpdatedInfo(vendorRep, appUser.getUsername(), msgController.getMsg("info.VRA"));
 					vendorRepository.save(vendorRep);
-					quotation.addMessage(msgController.createMsg("info.VRA"));				
+					quotation.addMessage(msgController.createMsg("info.VRA"));	
+					quotation.setProcessSuccessful(true);
 				}
 
 			}
@@ -274,9 +285,11 @@ public class VendorService {
 		Util.checkIfAlreadyActivated(appUser);
 
 		QuotationResponse quotation = new QuotationResponse();
+		quotation.setProcessSuccessful(false);
 
-		if (vendorID == null || "".equals(vendorID))
+		if (vendorID == null || "".equals(vendorID)) {
 			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));
+		}
 
 		if (quotation.getMessages().isEmpty()) {
 
@@ -296,6 +309,7 @@ public class VendorService {
 					
 					vendorRepository.save(vendorRep);
 					quotation.addMessage(msgController.createMsg("info.VRDA"));
+					quotation.setProcessSuccessful(true);
 				}
 				
 

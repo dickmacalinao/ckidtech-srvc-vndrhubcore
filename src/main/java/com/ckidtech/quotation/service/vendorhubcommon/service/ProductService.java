@@ -57,6 +57,7 @@ public class ProductService {
 		validateVendor(quotation, loginUser.getObjectRef());					
 		
 		quotation.setProducts(productRepository.listProducts(loginUser.getObjectRef(), flag));		
+		quotation.setProcessSuccessful(true);
 				
 		return quotation;
 		
@@ -92,6 +93,7 @@ public class ProductService {
 		}
 		
 		quotation.setProdGroups(prodGroups);
+		quotation.setProcessSuccessful(true);
 				
 		return quotation;
 		
@@ -107,6 +109,7 @@ public class ProductService {
 		validateVendor(quotation, loginUser.getObjectRef());
 		
 		quotation.setProducts(productRepository.searchProductsByName(loginUser.getObjectRef(), flag, productName));
+		quotation.setProcessSuccessful(true);
 		
 		return quotation;
 		
@@ -122,7 +125,8 @@ public class ProductService {
 		
 		Util.checkIfAlreadyActivated(loginUser);
 		
-		QuotationResponse quotation = new QuotationResponse();		
+		QuotationResponse quotation = new QuotationResponse();	
+		quotation.setProcessSuccessful(false);
 		
 		if ( product.getName()==null || "".equals(product.getName()) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product Name"));
@@ -145,6 +149,7 @@ public class ProductService {
 				productRepository.save(product);					
 				quotation.addMessage(msgController.createMsg("info.VPRC"));
 				quotation.setProduct(product);
+				quotation.setProcessSuccessful(true);
 			}	
 		}
 		
@@ -163,6 +168,7 @@ public class ProductService {
 		Util.checkIfAlreadyActivated(loginUser);
 		
 		QuotationResponse quotation = new QuotationResponse();
+		quotation.setProcessSuccessful(false);
 		
 		if ( product.getId()==null || "".equals(product.getId()) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product ID"));	
@@ -200,6 +206,7 @@ public class ProductService {
 					productRepository.save(productRep);
 					quotation.addMessage(msgController.createMsg("info.VPRU"));
 					quotation.setProduct(productRep);
+					quotation.setProcessSuccessful(true);
 				}
 										
 			} 	
@@ -221,6 +228,7 @@ public class ProductService {
 		Util.checkIfAlreadyActivated(loginUser);
 		
 		QuotationResponse quotation = new QuotationResponse();
+		quotation.setProcessSuccessful(false);
 
 		if ( productId==null || "".equals(productId) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product ID"));
@@ -247,6 +255,7 @@ public class ProductService {
 					productRepository.save(productRep);
 					quotation.addMessage(msgController.createMsg("info.VPRA"));
 					quotation.setProduct(productRep);
+					quotation.setProcessSuccessful(true);
 					
 				}
 				
@@ -265,6 +274,7 @@ public class ProductService {
 		Util.checkIfAlreadyActivated(loginUser);
 		
 		QuotationResponse quotation = new QuotationResponse();
+		quotation.setProcessSuccessful(false);
 		
 		if ( productId==null || "".equals(productId) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product ID"));
@@ -290,7 +300,8 @@ public class ProductService {
 					Util.initalizeUpdatedInfo(productRep, loginUser.getUsername(), msgController.getMsg("info.VPRDA"));
 					productRepository.save(productRep);
 					quotation.addMessage(msgController.createMsg("info.VPRDA"));
-					quotation.setProduct(productRep);						
+					quotation.setProduct(productRep);	
+					quotation.setProcessSuccessful(true);
 				}					
 				
 			} 	
@@ -311,6 +322,7 @@ public class ProductService {
 		Util.checkIfAlreadyActivated(loginUser);
 		
 		QuotationResponse quotation = new QuotationResponse();
+		quotation.setProcessSuccessful(false);
 
 		if ( productCode==null || "".equals(productCode) ) 
 			quotation.addMessage(msgController.createMsg("error.MFE", "Product ID"));	
@@ -330,6 +342,7 @@ public class ProductService {
 				
 				productRepository.delete(productRep);
 				quotation.addMessage(msgController.createMsg("info.VPRD"));
+				quotation.setProcessSuccessful(true);
 				
 			}
 		}			
@@ -373,6 +386,7 @@ public class ProductService {
 		QuotationResponse quotation = new QuotationResponse();
 		productRepository.deleteAll();
 		quotation.addMessage(msgController.createMsg("info.AVPSD"));
+		quotation.setProcessSuccessful(true);
 		return quotation;
 
 	}
