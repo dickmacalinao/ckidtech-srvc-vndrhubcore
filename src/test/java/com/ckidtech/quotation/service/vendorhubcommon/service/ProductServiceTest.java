@@ -40,7 +40,7 @@ public class ProductServiceTest {
 	
 	public static AppUser APP_ADMIN = new AppUser("APP_ADMIN", "Administrator", "testpass", UserRole.APP_ADMIN, "VendorHub", "");
 	
-	public static Vendor TEST_VENDOR = new Vendor("Test Vendor", "Address", "9999999999", "imagelink");	
+	public static Vendor TEST_VENDOR = new Vendor("Test Vendor", "imagelink");	
 	public static Product TEST_PRODUCT = new Product("TEST_VENDOR", "Food", "Product", "imgLocation");
 	
 	private String APP_ADMIN_ID = "";

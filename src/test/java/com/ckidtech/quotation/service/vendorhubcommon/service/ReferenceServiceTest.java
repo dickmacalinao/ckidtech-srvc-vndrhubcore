@@ -45,7 +45,7 @@ public class ReferenceServiceTest {
 	
 	public static AppUser USER_ADMIN = new AppUser("USER_ADMIN", "Administrator", "testpass", UserRole.APP_ADMIN, "VendorHub", "");		
 	
-	public static Vendor TEST_VENDOR = new Vendor("Test Vendor", "Address", "9999999999", "imagelink");	
+	public static Vendor TEST_VENDOR = new Vendor("Test Vendor", "imagelink");	
 	
 	private String TEST_VENDOR_ID;
 	private String VENDOR_ADMIN_ID;

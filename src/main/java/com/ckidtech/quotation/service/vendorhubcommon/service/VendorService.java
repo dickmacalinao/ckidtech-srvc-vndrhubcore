@@ -94,10 +94,6 @@ public class VendorService {
 
 		if (vendor.getName() == null || "".equals(vendor.getName()))
 			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Name"));
-		if (vendor.getAddress() == null || "".equals(vendor.getAddress()))
-			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Address"));
-		if (vendor.getContactNo() == null || "".equals(vendor.getContactNo()))
-			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Contact No"));
 
 		if ( quotation.getMessages().isEmpty() ) {
 			
@@ -139,10 +135,6 @@ public class VendorService {
 			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));
 		if (vendor.getName() == null || "".equals(vendor.getName()))
 			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Name"));
-		if (vendor.getAddress() == null || "".equals(vendor.getAddress()))
-			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Address"));
-		if (vendor.getContactNo() == null || "".equals(vendor.getContactNo()))
-			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor Contact No"));
 
 		if (quotation.getMessages().isEmpty()) {
 
@@ -155,8 +147,6 @@ public class VendorService {
 				Util.initalizeUpdatedInfo(vendorRep, appUser.getUsername(), vendorRep.getDifferences(vendor));				
 				vendorRep.setActiveIndicator(vendor.isActiveIndicator());
 				vendorRep.setName(vendor.getName());
-				vendorRep.setAddress(vendor.getAddress());
-				vendorRep.setContactNo(vendor.getContactNo());
 				vendorRep.setImgLocation(vendor.getImgLocation());
 
 				vendorRepository.save(vendorRep);

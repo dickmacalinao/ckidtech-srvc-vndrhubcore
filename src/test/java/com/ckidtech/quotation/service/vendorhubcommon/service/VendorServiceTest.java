@@ -41,8 +41,8 @@ public class VendorServiceTest {
 	
 	@Test
 	public void viewAllVendorsTest(){			
-		vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor 1", "Address", "9999999999", "imagelink"));
-		vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor 2", "Address", "9999999999", "imagelink"));
+		vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor 1", "imagelink"));
+		vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor 2", "imagelink"));
 		
 		List<Vendor> allVendors = vendorService.viewAllVendors();
 		assertEquals(2, allVendors.size());
@@ -50,8 +50,8 @@ public class VendorServiceTest {
 	
 	@Test
 	public void searchVendorsTest() {			
-		vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor 1", "Address", "9999999999", "imagelink"));
-		vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor 2", "Address", "9999999999", "imagelink"));
+		vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor 1", "imagelink"));
+		vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor 2", "imagelink"));
 		
 		List<Vendor> allVendors = vendorService.searchVendors("Test Vendor");
 		assertEquals(2, allVendors.size());
@@ -59,8 +59,8 @@ public class VendorServiceTest {
 	
 	@Test
 	public void viewActiveVendorsTest() {			
-		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor 1", "Address", "9999999999", "imagelink"));
-		vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor 2", "Address", "9999999999", "imagelink"));
+		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor 1", "imagelink"));
+		vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor 2", "imagelink"));
 		vendorService.activateVendor(ADMIN_USER, response.getVendor().getId());
 		
 		List<Vendor> activeVendors = vendorService.viewActiveVendors();
@@ -69,14 +69,12 @@ public class VendorServiceTest {
 	
 	@Test
 	public void getVendorByIdTest() {				
-		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "Address", "9999999999", "imagelink"));
+		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "imagelink"));
 		String id = response.getVendor().getId();
 		
 		Vendor vendor = vendorService.getVendorById(id);
 		assertEquals(id, vendor.getId());
 		assertEquals("Test Vendor", vendor.getName());
-		assertEquals("Address", vendor.getAddress());
-		assertEquals("9999999999", vendor.getContactNo());
 		assertEquals("imagelink", vendor.getImgLocation());
 	}
 
@@ -84,15 +82,12 @@ public class VendorServiceTest {
 	public void addVendorTest() {	
 		
 		// Missing Mandatory fields
-		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("", "", "", ""));
-		assertEquals(3, response.getMessages().size());
-		assertTrue("Vendor Name is required.", response.getMessages().contains(new ReturnMessage("Vendor Name is required.", ReturnMessage.MessageTypeEnum.ERROR)));
-		assertTrue("Vendor Address is required.", response.getMessages().contains(new ReturnMessage("Vendor Address is required.", ReturnMessage.MessageTypeEnum.ERROR)));
-		assertTrue("Vendor Contact No is required.", response.getMessages().contains(new ReturnMessage("Vendor Contact No is required.", ReturnMessage.MessageTypeEnum.ERROR)));
-		
+		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("", ""));
+		assertEquals(1, response.getMessages().size());
+		assertTrue("Vendor Name is required.", response.getMessages().contains(new ReturnMessage("Vendor Name is required.", ReturnMessage.MessageTypeEnum.ERROR)));		
 		
 		// Successful Scenario
-		response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "Address", "9999999999", "imagelink"));
+		response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "imagelink"));
 		assertTrue("Vendor created.", response.getMessages().contains(new ReturnMessage("Vendor created.", ReturnMessage.MessageTypeEnum.INFO)));
 		
 		List<Vendor> allVendors = vendorService.viewAllVendors();
@@ -102,12 +97,10 @@ public class VendorServiceTest {
 		
 		assertNotEquals(null, vendor.getId());
 		assertEquals("Test Vendor", vendor.getName());
-		assertEquals("Address", vendor.getAddress());
-		assertEquals("9999999999", vendor.getContactNo());
 		assertEquals("imagelink", vendor.getImgLocation());
 		
 		// Duplicate vendor test
-		response = vendorService.addVendor(ADMIN_USER, new Vendor(vendor.getId(), "Test Vendor", "Address", "9999999999", "imagelink"));
+		response = vendorService.addVendor(ADMIN_USER, new Vendor(vendor.getId(), "Test Vendor", "imagelink"));
 		assertTrue("Vendor name already exists.", response.getMessages().contains(new ReturnMessage("Vendor name already exists.", ReturnMessage.MessageTypeEnum.ERROR)));
 	}
 	
@@ -118,27 +111,22 @@ public class VendorServiceTest {
 		addVendorTest();
 		
 		// Missing Mandatory fields
-		QuotationResponse response = vendorService.updateVendor(ADMIN_USER, new Vendor("", "", "", "", ""));
-		assertEquals(4, response.getMessages().size());
+		QuotationResponse response = vendorService.updateVendor(ADMIN_USER, new Vendor("", "", ""));
+		assertEquals(2, response.getMessages().size());
 		assertTrue("Vendor ID is required.", response.getMessages().contains(new ReturnMessage("Vendor ID is required.", ReturnMessage.MessageTypeEnum.ERROR)));
-		assertTrue("Vendor Name is required.", response.getMessages().contains(new ReturnMessage("Vendor Name is required.", ReturnMessage.MessageTypeEnum.ERROR)));
-		assertTrue("Vendor Address is required.", response.getMessages().contains(new ReturnMessage("Vendor Address is required.", ReturnMessage.MessageTypeEnum.ERROR)));
-		assertTrue("Vendor Contact No is required.", response.getMessages().contains(new ReturnMessage("Vendor Contact No is required.", ReturnMessage.MessageTypeEnum.ERROR)));
-		
+		assertTrue("Vendor Name is required.", response.getMessages().contains(new ReturnMessage("Vendor Name is required.", ReturnMessage.MessageTypeEnum.ERROR)));		
 		
 		// Successful scenario		
 		Vendor vendor = vendorService.viewAllVendors().get(0);
 		
-		response = vendorService.updateVendor(ADMIN_USER, new Vendor(vendor.getId(), "Test Vendor New", "Address New", "9999999999 New", "imagelink New"));
+		response = vendorService.updateVendor(ADMIN_USER, new Vendor(vendor.getId(), "Test Vendor New", "imagelink New"));
 		assertTrue("Vendor updated.", response.getMessages().contains(new ReturnMessage("Vendor updated.", ReturnMessage.MessageTypeEnum.INFO)));
 		
 		assertEquals("Test Vendor New", response.getVendor().getName());
-		assertEquals("Address New", response.getVendor().getAddress());
-		assertEquals("9999999999 New", response.getVendor().getContactNo());
 		assertEquals("imagelink New", response.getVendor().getImgLocation());
 		
 		// Vendor not found
-		response = vendorService.updateVendor(ADMIN_USER, new Vendor("TEST2", "Test Vendor New", "Address New", "9999999999 New", "imagelink New"));		
+		response = vendorService.updateVendor(ADMIN_USER, new Vendor("TEST2", "Test Vendor New", "imagelink New"));		
 		assertEquals("Vendor not found.", response.getMessages().get(0).getMessage());
 	}
 	
@@ -146,7 +134,7 @@ public class VendorServiceTest {
 	public void deleteVendorTest() {		
 		
 		// Successful delete
-		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "Address", "9999999999", "imagelink"));
+		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "imagelink"));
 		
 		List<Vendor> allVendors = vendorService.viewAllVendors();
 		assertEquals(1, allVendors.size());
@@ -168,7 +156,7 @@ public class VendorServiceTest {
 		
 		
 		// Successful activation
-		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "Address", "9999999999", "imagelink"));
+		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "imagelink"));
 		
 		Vendor vendor = response.getVendor();		
 		assertEquals(false, vendor.isActiveIndicator());
@@ -193,7 +181,7 @@ public class VendorServiceTest {
 	public void deActivateVendorTest() {				
 		
 		// Successful de-activation
-		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "Address", "9999999999", "imagelink"));
+		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "imagelink"));
 		
 		Vendor vendor = vendorService.getVendorById(response.getVendor().getId());		
 		assertEquals(false, vendor.isActiveIndicator());
