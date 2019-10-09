@@ -119,11 +119,15 @@ public class VendorServiceTest {
 		// Successful scenario		
 		Vendor vendor = vendorService.viewAllVendors().get(0);
 		
-		response = vendorService.updateVendor(ADMIN_USER, new Vendor(vendor.getId(), "Test Vendor New", "imagelink New"));
+		response = vendorService.updateVendor(ADMIN_USER, new Vendor(vendor.getId(), "Test Vendor New", "imagelink New", 10, 20, 30, 40));
 		assertTrue("Vendor updated.", response.getMessages().contains(new ReturnMessage("Vendor updated.", ReturnMessage.MessageTypeEnum.INFO)));
 		
 		assertEquals("Test Vendor New", response.getVendor().getName());
 		assertEquals("imagelink New", response.getVendor().getImgLocation());
+		assertEquals(10, response.getVendor().getMaxSearchResult());
+		assertEquals(20, response.getVendor().getMaxOrderPerDay());
+		assertEquals(30, response.getVendor().getMaxUserAllowed());
+		assertEquals(40, response.getVendor().getMaxProductAllowed());
 		
 		// Vendor not found
 		response = vendorService.updateVendor(ADMIN_USER, new Vendor("TEST2", "Test Vendor New", "imagelink New"));		

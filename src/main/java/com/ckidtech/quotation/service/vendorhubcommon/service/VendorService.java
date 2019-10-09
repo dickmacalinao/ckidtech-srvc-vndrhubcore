@@ -1,8 +1,6 @@
 package com.ckidtech.quotation.service.vendorhubcommon.service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,7 +54,7 @@ public class VendorService {
 		LOG.log(Level.INFO, "Calling Vendor Service searchVendors()");
 		@SuppressWarnings("deprecation")
 		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "name");
-		Map<String, List<Vendor>> vendors = new HashMap<String, List<Vendor>>();
+		//Map<String, List<Vendor>> vendors = new HashMap<String, List<Vendor>>();
 		return vendorRepository.findByName(name, pageable);
 	}
 
@@ -148,6 +146,10 @@ public class VendorService {
 				vendorRep.setActiveIndicator(vendor.isActiveIndicator());
 				vendorRep.setName(vendor.getName());
 				vendorRep.setImgLocation(vendor.getImgLocation());
+				vendorRep.setMaxSearchResult(vendor.getMaxSearchResult());
+				vendorRep.setMaxOrderPerDay(vendor.getMaxOrderPerDay());
+				vendorRep.setMaxUserAllowed(vendor.getMaxUserAllowed());
+				vendorRep.setMaxProductAllowed(vendor.getMaxProductAllowed());
 
 				vendorRepository.save(vendorRep);
 				quotation.addMessage(msgController.createMsg("info.VRU"));
