@@ -63,6 +63,42 @@ public class ProductService {
 		
 	}	
 	
+	public QuotationResponse listProductsByGroup(AppUser loginUser) {
+		
+		LOG.log(Level.INFO, "Calling Vendor Service listProductsByGroup(" + loginUser + ")");
+		
+		Util.checkIfAlreadyActivated(loginUser);
+		
+		QuotationResponse quotation = new QuotationResponse();		
+		validateVendor(quotation, loginUser.getObjectRef());	
+			
+		List<ProductGroup> prodGroups = new ArrayList<ProductGroup>();
+		ProductGroup prodGroup;
+		
+		@SuppressWarnings("deprecation")
+		Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "grantTo", "value");
+		List<ReferenceData> groups =  referenceDataRepository.searchByRoleAndRefGroup(loginUser.getObjectRef(), "ProductGroup", pageable);
+		int index = 0;
+		List<Product> products;
+		for ( ReferenceData group : groups ) {
+			prodGroup = new ProductGroup();
+			prodGroup.setTitle(group.getValue());			
+			prodGroup.setKey(group.getValue() + index);			
+			products = productRepository.listProductsByGroup(loginUser.getObjectRef(), group.getValue());
+			if ( products.size()>0 ) {
+				prodGroup.setData(products);
+				prodGroups.add(prodGroup);
+			}			
+			index++;
+		}
+		
+		quotation.setProdGroups(prodGroups);
+		quotation.setProcessSuccessful(true);
+				
+		return quotation;
+		
+	}
+	
 	public QuotationResponse listProductsByGroup(AppUser loginUser, boolean flag) {
 		
 		LOG.log(Level.INFO, "Calling Vendor Service listProductsByGroup(" + loginUser + "," + flag + ")");
@@ -86,7 +122,7 @@ public class ProductService {
 			prodGroup.setKey(group.getValue() + index);			
 			products = productRepository.listProductsByGroup(loginUser.getObjectRef(), flag, group.getValue());
 			if ( products.size()>0 ) {
-				prodGroup.setProducts(productRepository.listProductsByGroup(loginUser.getObjectRef(), flag, group.getValue()));
+				prodGroup.setData(products);
 				prodGroups.add(prodGroup);
 			}			
 			index++;

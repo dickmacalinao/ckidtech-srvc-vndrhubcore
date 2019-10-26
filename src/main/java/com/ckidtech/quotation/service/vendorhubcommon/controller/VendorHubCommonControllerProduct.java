@@ -51,6 +51,15 @@ public class VendorHubCommonControllerProduct {
 		return new ResponseEntity<Object>(productService.listProducts(loginUser, false), HttpStatus.OK);		
 	}
 	
+	@RequestMapping(value = "/product/vendoradmin/listproductsbygroup")
+	public ResponseEntity<Object> findProductsByGroup(@RequestHeader("authorization") String authorization) throws Exception {		
+		LOG.log(Level.INFO, "Calling API /product/vendoradmin/listproductsbygroup");	
+		
+		AppUser loginUser = new AppUser(authorization);
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
+		return new ResponseEntity<Object>(productService.listProductsByGroup(loginUser), HttpStatus.OK);		
+	}
+	
 	@RequestMapping(value = "/product/vendoradmin/listactiveproductsbygroup")
 	public ResponseEntity<Object> findActiveProductsByGroup(@RequestHeader("authorization") String authorization) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /product/vendoradmin/listactiveproductsbygroup");	
