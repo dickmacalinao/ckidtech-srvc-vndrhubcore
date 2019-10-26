@@ -40,7 +40,7 @@ public class ProductServiceTest {
 	
 	public static AppUser APP_ADMIN = new AppUser("APP_ADMIN", "Administrator", "testpass", UserRole.APP_ADMIN, "VendorHub", "");
 	
-	public static Vendor TEST_VENDOR = new Vendor("Test Vendor", "imagelink");	
+	public static Vendor TEST_VENDOR = new Vendor("TEST_VENDOR", "Test Vendor", "imagelink", 2, 2, 2, 2);	
 	public static Product TEST_PRODUCT = new Product("TEST_VENDOR", "Food", "Product", "imgLocation");
 	
 	private String APP_ADMIN_ID = "";
@@ -91,6 +91,7 @@ public class ProductServiceTest {
 		assertEquals(true, userVendorAdmin.isActiveIndicator());
 		
 		response = productService.addVendorProduct(userVendorAdmin, TEST_PRODUCT);		
+		response.showMesssages();
 		assertTrue("Product created.", response.getMessages().contains(new ReturnMessage("Product created.", ReturnMessage.MessageTypeEnum.INFO)));
 				
 		assertNotEquals(null, response.getProduct().getId());
@@ -234,7 +235,7 @@ public class ProductServiceTest {
 		response = productService.deActivateVendorProduct(userVendorAdmin, response.getProducts().get(0).getId());
 		assertEquals(1, response.getMessages().size());
 		assertTrue("Product deactivated.", response.getMessages().contains(new ReturnMessage("Product deactivated.", ReturnMessage.MessageTypeEnum.INFO)));
-		assertEquals(true, response.getProduct().isActiveIndicator());
+		assertEquals(false, response.getProduct().isActiveIndicator());
 	}
 	
 	@Test

@@ -171,6 +171,16 @@ public class ProductService {
 		
 		validateVendor(quotation, loginUser.getObjectRef());
 		
+		Vendor vendor = vendorRepository.findById(loginUser.getObjectRef()).orElse(null);
+		if ( vendor!= null) {				
+			// Verify if exceed maximum limit						
+			int productCount = productRepository.listProducts(loginUser.getObjectRef(), true).size() + productRepository.listProducts(loginUser.getObjectRef(), false).size();		
+			LOG.log(Level.INFO, "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX:productCount=" + productCount + ", getMaxProductAllowed=" + vendor.getMaxProductAllowed());
+			if ( productCount >= vendor.getMaxProductAllowed() ) {
+				quotation.addMessage(msgController.createMsg("error.VPEML", vendor.getMaxProductAllowed()));								
+			}	
+		}
+		
 		if( quotation.getMessages().isEmpty() ) {					
 
 			List<Product> products = productRepository.searchProductsByNameOnly(loginUser.getObjectRef(), product.getName());
@@ -332,7 +342,7 @@ public class ProductService {
 				if ( !productRep.isActiveIndicator() ) {
 					quotation.addMessage(msgController.createMsg("error.VPADAE"));
 				} else {
-					productRep.setActiveIndicator(true);						
+					productRep.setActiveIndicator(false);						
 					Util.initalizeUpdatedInfo(productRep, loginUser.getUsername(), msgController.getMsg("info.VPRDA"));
 					productRepository.save(productRep);
 					quotation.addMessage(msgController.createMsg("info.VPRDA"));
