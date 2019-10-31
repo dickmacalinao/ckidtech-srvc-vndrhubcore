@@ -277,7 +277,7 @@ public class ProductService {
 		quotation.setProcessSuccessful(false);
 
 		if ( productId==null || "".equals(productId) ) 
-			quotation.addMessage(msgController.createMsg("error.MFE", "Product ID"));
+			quotation.addMessage(msgController.createMsg("error.MFE", "Product ID"));	
 		
 		validateVendor(quotation, loginUser.getObjectRef());
 		
@@ -296,12 +296,17 @@ public class ProductService {
 				if ( productRep.isActiveIndicator() ) {
 					quotation.addMessage(msgController.createMsg("error.VPAAE"));
 				} else {
-					productRep.setActiveIndicator(true);						
-					Util.initalizeUpdatedInfo(productRep, loginUser.getUsername(), msgController.getMsg("info.VPRA"));
-					productRepository.save(productRep);
-					quotation.addMessage(msgController.createMsg("info.VPRA"));
-					quotation.setProduct(productRep);
-					quotation.setProcessSuccessful(true);
+					
+					if ( productRep.getImgLocation()==null || "".equals(productRep.getImgLocation()) ) {
+						quotation.addMessage(msgController.createMsg("error.VPIM"));
+					} else {
+						productRep.setActiveIndicator(true);						
+						Util.initalizeUpdatedInfo(productRep, loginUser.getUsername(), msgController.getMsg("info.VPRA"));
+						productRepository.save(productRep);
+						quotation.addMessage(msgController.createMsg("info.VPRA"));
+						quotation.setProduct(productRep);
+						quotation.setProcessSuccessful(true);						
+					}
 					
 				}
 				
