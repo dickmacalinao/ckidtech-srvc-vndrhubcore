@@ -147,7 +147,6 @@ public class VendorService {
 				vendorRep.setName(vendor.getName());
 				vendorRep.setImgLocation(vendor.getImgLocation());
 				vendorRep.setMaxSearchResult(vendor.getMaxSearchResult());
-				vendorRep.setMaxOrderPerDay(vendor.getMaxOrderPerDay());
 				vendorRep.setMaxUserAllowed(vendor.getMaxUserAllowed());
 				vendorRep.setMaxProductAllowed(vendor.getMaxProductAllowed());
 
