@@ -1,11 +1,13 @@
 package com.ckidtech.quotation.service.vendorhubcommon.service;
 
+import java.time.ZoneId;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -31,6 +33,9 @@ public class VendorService {
 
 	@Autowired
 	private MessageController msgController;
+	
+	@Autowired
+	private Environment env;
 
 	/**
 	 * View all vendor records by Administrator user
@@ -100,7 +105,7 @@ public class VendorService {
 			if ( vendors.size()>0 ) {				
 				quotation.addMessage(msgController.createMsg("error.VAEE"));
 			} else {				
-				Util.initalizeCreatedInfo(vendor, appUser.getUsername(), msgController.getMsg("info.VRC"));
+				Util.initalizeCreatedInfo(vendor, appUser.getUsername(), msgController.getMsg("info.VRC"), ZoneId.of(env.getProperty("constant.zoneId")));
 				vendor.setId(null);
 				vendor.setActiveIndicator(false);
 				vendorRepository.save(vendor);
@@ -142,7 +147,7 @@ public class VendorService {
 				quotation.addMessage(msgController.createMsg("error.VNFE"));
 			} else {
 
-				Util.initalizeUpdatedInfo(vendorRep, appUser.getUsername(), vendorRep.getDifferences(vendor));				
+				Util.initalizeUpdatedInfo(vendorRep, appUser.getUsername(), vendorRep.getDifferences(vendor), ZoneId.of(env.getProperty("constant.zoneId")));				
 				vendorRep.setActiveIndicator(vendor.isActiveIndicator());
 				vendorRep.setName(vendor.getName());
 				vendorRep.setImgLocation(vendor.getImgLocation());
@@ -249,7 +254,7 @@ public class VendorService {
 					quotation.addMessage(msgController.createMsg("error.VAAE"));
 				} else {
 					vendorRep.setActiveIndicator(true);
-					Util.initalizeUpdatedInfo(vendorRep, appUser.getUsername(), msgController.getMsg("info.VRA"));
+					Util.initalizeUpdatedInfo(vendorRep, appUser.getUsername(), msgController.getMsg("info.VRA"), ZoneId.of(env.getProperty("constant.zoneId")));
 					vendorRepository.save(vendorRep);
 					quotation.addMessage(msgController.createMsg("info.VRA"));	
 					quotation.setProcessSuccessful(true);
@@ -294,7 +299,7 @@ public class VendorService {
 					quotation.addMessage(msgController.createMsg("error.VADAE"));
 				} else {
 					vendorRep.setActiveIndicator(false);
-					Util.initalizeUpdatedInfo(vendorRep, appUser.getUsername(), msgController.getMsg("info.VRDA"));
+					Util.initalizeUpdatedInfo(vendorRep, appUser.getUsername(), msgController.getMsg("info.VRDA"), ZoneId.of(env.getProperty("constant.zoneId")));
 					
 					//appUserService.deActivateAllAppUser(appUser, vendorID); // Deactivate all users under that vendor
 					

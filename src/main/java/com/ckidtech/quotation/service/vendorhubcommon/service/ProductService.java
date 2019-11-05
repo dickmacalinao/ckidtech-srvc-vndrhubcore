@@ -1,5 +1,6 @@
 package com.ckidtech.quotation.service.vendorhubcommon.service;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -7,6 +8,7 @@ import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -42,10 +44,12 @@ public class ProductService {
 	
 	@Autowired
 	private ReferenceDataRepository referenceDataRepository;
-	
-	
+		
 	@Autowired
 	private MessageController msgController;
+	
+	@Autowired
+	private Environment env;
 	
 	public QuotationResponse listProducts(AppUser loginUser, boolean flag) {	
 		
@@ -188,7 +192,7 @@ public class ProductService {
 			if  ( products.size()>0 ) {
 				quotation.addMessage(msgController.createMsg("error.VPAEE"));						
 			} else {
-				Util.initalizeCreatedInfo(product, loginUser.getUsername(), msgController.getMsg("info.VPRC"));
+				Util.initalizeCreatedInfo(product, loginUser.getUsername(), msgController.getMsg("info.VPRC"), ZoneId.of(env.getProperty("constant.zoneId")));
 				product.setId(null);
 				product.setActiveIndicator(false);
 				product.setVendorCode(loginUser.getObjectRef());
@@ -248,7 +252,7 @@ public class ProductService {
 					productRep.setImgLocation(product.getImgLocation());
 					productRep.setProdComp(product.getProdComp());
 					
-					Util.initalizeUpdatedInfo(productRep, loginUser.getUsername(), msgController.getMsg("info.VPRU"));
+					Util.initalizeUpdatedInfo(productRep, loginUser.getUsername(), msgController.getMsg("info.VPRU"), ZoneId.of(env.getProperty("constant.zoneId")));
 					productRepository.save(productRep);
 					quotation.addMessage(msgController.createMsg("info.VPRU"));
 					quotation.setProduct(productRep);
@@ -301,7 +305,7 @@ public class ProductService {
 						quotation.addMessage(msgController.createMsg("error.VPIM"));
 					} else {
 						productRep.setActiveIndicator(true);						
-						Util.initalizeUpdatedInfo(productRep, loginUser.getUsername(), msgController.getMsg("info.VPRA"));
+						Util.initalizeUpdatedInfo(productRep, loginUser.getUsername(), msgController.getMsg("info.VPRA"), ZoneId.of(env.getProperty("constant.zoneId")));
 						productRepository.save(productRep);
 						quotation.addMessage(msgController.createMsg("info.VPRA"));
 						quotation.setProduct(productRep);
@@ -348,7 +352,7 @@ public class ProductService {
 					quotation.addMessage(msgController.createMsg("error.VPADAE"));
 				} else {
 					productRep.setActiveIndicator(false);						
-					Util.initalizeUpdatedInfo(productRep, loginUser.getUsername(), msgController.getMsg("info.VPRDA"));
+					Util.initalizeUpdatedInfo(productRep, loginUser.getUsername(), msgController.getMsg("info.VPRDA"), ZoneId.of(env.getProperty("constant.zoneId")));
 					productRepository.save(productRep);
 					quotation.addMessage(msgController.createMsg("info.VPRDA"));
 					quotation.setProduct(productRep);	
