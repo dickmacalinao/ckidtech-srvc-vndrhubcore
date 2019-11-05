@@ -50,6 +50,10 @@
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.ckidtech.quotation-service-core</groupId>
 			<artifactId>ckidtech-srvc-core</artifactId>
 			<version>0.0.1</version>

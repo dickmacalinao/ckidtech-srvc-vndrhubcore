@@ -1,13 +1,11 @@
 package com.ckidtech.quotation.service.vendorhubcommon.service;
 
-import java.time.ZoneId;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.core.env.Environment;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -43,9 +41,6 @@ public class ReferenceDataService {
 	
 	@Autowired
 	private MessageController msgController;
-	
-	@Autowired
-	private Environment env;	
 	
 	public List<ReferenceData> viewAllReferenceData() {
 		LOG.log(Level.INFO, "Calling AppConfig Service viewAllReferenceData()");
@@ -104,7 +99,7 @@ public class ReferenceDataService {
 			}
 
 			if (quotation.getMessages().isEmpty()) {
-				Util.initalizeCreatedInfo(refData, loginUser.getUsername(), msgController.getMsg("info.RDRC"), ZoneId.of(env.getProperty("constant.zoneId")));
+				Util.initalizeCreatedInfo(refData, loginUser.getUsername(), msgController.getMsg("info.RDRC"));
 				refData.setId(null);
 				refData.setActiveIndicator(true);
 				referenceDataRepository.save(refData);		
@@ -146,7 +141,7 @@ public class ReferenceDataService {
 				refRep.setRefGroup(refData.getRefGroup());
 				refRep.setValue(refData.getValue());
 				refRep.setActiveIndicator(true);
-				Util.initalizeUpdatedInfo(refRep, loginUser.getUsername(), msgController.getMsg("info.RDRU"), ZoneId.of(env.getProperty("constant.zoneId")));
+				Util.initalizeUpdatedInfo(refRep, loginUser.getUsername(), msgController.getMsg("info.RDRU"));
 				referenceDataRepository.save(refRep);
 				
 				quotation.setReferenceData(refData);

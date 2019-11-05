@@ -1,12 +1,16 @@
 package com.ckidtech.quotation.service.vendorhubcommon.controller;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,10 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ckidtech.quotation.service.core.controller.QuotationResponse;
 import com.ckidtech.quotation.service.core.model.AppUser;
+import com.ckidtech.quotation.service.core.model.Connection;
 import com.ckidtech.quotation.service.core.model.ReferenceData;
 import com.ckidtech.quotation.service.core.security.UserRole;
 import com.ckidtech.quotation.service.core.utils.Util;
 import com.ckidtech.quotation.service.vendorhubcommon.service.ReferenceDataService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ComponentScan({"com.ckidtech.quotation.service.core.service"})
 @RestController
@@ -31,6 +38,37 @@ public class VendorHubCommonControllerConfig {
 	
 	@Autowired
 	private ReferenceDataService referenceDataService;
+	
+	@Value("classpath:/resources/static/json/test.json")
+    private Resource testMockup;
+	
+	
+	// Open services
+	@RequestMapping(value = "/config/open/getConnection/{env}")
+	public ResponseEntity<Object> opengetConnection(@PathVariable("env") String env) throws Exception {		
+		LOG.log(Level.INFO, "Calling API /config/open/getConnection");
+		
+		// read json file data to String
+		byte[] jsonData = Files.readAllBytes(Paths.get("src/main/resources/static/json/connections.json"));
+		
+		
+		// create ObjectMapper instance
+		ObjectMapper objectMapper = new ObjectMapper();
+		
+		// Convert json string to object
+		List<Connection> connections = objectMapper.readValue(jsonData, new TypeReference<List<Connection>>() {});
+		
+		Connection retConn = null;
+		for (Connection conn : connections) {
+			if ( env.equalsIgnoreCase(conn.getId()) ) {
+				retConn = conn;
+				break;
+			}
+			//LOG.log(Level.INFO, "Connection:" + conn);
+		}			
+		
+		return new ResponseEntity<Object>(retConn, HttpStatus.OK);		
+	}
 	
 	
 	// Service for ADMIN
