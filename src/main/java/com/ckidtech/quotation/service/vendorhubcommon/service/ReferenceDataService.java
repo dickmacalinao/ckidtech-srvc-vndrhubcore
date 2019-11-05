@@ -159,14 +159,12 @@ public class ReferenceDataService {
 	 * 
 	 * @return
 	 */	
-	public QuotationResponse deleteReferenceData(String grantTo, String refId) {
+	public QuotationResponse deleteReferenceData(AppUser loginUser, String refId) {
 		LOG.log(Level.INFO, "Calling AppConfig Service deleteReferenceData()");
 		
 		QuotationResponse quotation = new QuotationResponse();
 		quotation.setProcessSuccessful(false);
 		
-		if (grantTo == null || "".equals(grantTo))
-			quotation.addMessage(msgController.createMsg("error.MFE", "Vendor ID"));
 		if (refId == null || "".equals(refId))
 			quotation.addMessage(msgController.createMsg("error.MFE", "ID"));
 		
@@ -181,12 +179,12 @@ public class ReferenceDataService {
 			} 
 			
 			// Reference data not assigned to vendor cannot be deleted.
-			if ( !"ALL".equals(grantTo) && !grantTo.equalsIgnoreCase(refRep.getGrantTo()) ) {
-				quotation.addMessage(msgController.createMsg("error.RDCBDE"));
-				return quotation;
-			}
+			//if ( !"ALL".equals(grantTo) && !grantTo.equalsIgnoreCase(refRep.getGrantTo()) ) {
+			//	quotation.addMessage(msgController.createMsg("error.RDCBDE"));
+			//	return quotation;
+			//}
 			
-			checkForObjectReference(quotation, grantTo, refRep.getValue());
+			checkForObjectReference(quotation, loginUser.getObjectRef(), refRep.getValue());
 			
 			if ( quotation.getMessages().isEmpty() ) {	
 				referenceDataRepository.delete(refRep);	
@@ -221,11 +219,10 @@ public class ReferenceDataService {
 	private void checkForProductReference(QuotationResponse quotation, String vendorId, String refValue) {		
 
 		// Retrieve references from product
-		List<Product> actviveProducts = productRepository.listProductsByGroup(vendorId, true, refValue);
-		List<Product> inActviveProducts = productRepository.listProductsByGroup(vendorId, false, refValue);
+		List<Product> allProducts = productRepository.listProductsByGroup(vendorId, refValue);
 		
-		// Reference data is referenced by active or inactive products. Kindly delete those referencing object first before proceeding.
-		if ( actviveProducts.size()>0 || inActviveProducts.size()>0 ) {
+		// Reference data is referenced by products. Kindly delete those referencing object first before proceeding.
+		if ( allProducts.size()>0 ) {
 			quotation.addMessage(msgController.createMsg("error.RDRBPE"));
 		}
 		

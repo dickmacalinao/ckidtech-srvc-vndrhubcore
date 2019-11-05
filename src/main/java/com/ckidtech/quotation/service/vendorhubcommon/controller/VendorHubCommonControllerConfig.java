@@ -33,28 +33,7 @@ public class VendorHubCommonControllerConfig {
 	private ReferenceDataService referenceDataService;
 	
 	
-	// Service open to all 
-	/*
-	@RequestMapping(value = "/config/open/getrestconnectionconfig")
-	public ResponseEntity<Object> getRESTConnectionConfig() {		
-		LOG.log(Level.INFO, "Calling API /config/open/getrestconnectionconfig");
-		return new ResponseEntity<Object>(
-			referenceDataService.viewRESTConnectionConfig(), HttpStatus.OK);		
-	}
-	*/
-		
-	
-	// Services for ADMIN only
-	
-	/*
-	@RequestMapping(value = "/config/admin/viewallreferncedata")
-	public ResponseEntity<Object> viewAllRefernceData(@RequestHeader("authorization") String authorization) throws Exception {		
-		LOG.log(Level.INFO, "Calling API /config/admin/viewallreferncedata");
-		Util.checkAccessGrant(authorization, UserRole.ADMIN, null);
-		return new ResponseEntity<Object>(
-			referenceDataService.viewAllReferenceData(), HttpStatus.OK);		
-	}
-	*/
+	// Service for ADMIN
 	
 	@RequestMapping(value = "/config/appadmin/createreferencedata", method = RequestMethod.POST)
 	public ResponseEntity<Object> createReferenceData(@RequestHeader("authorization") String authorization,
@@ -101,6 +80,16 @@ public class VendorHubCommonControllerConfig {
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(referenceDataService.updateReferenceData(loginUser, refData), HttpStatus.OK);		
+	}
+	
+	@RequestMapping(value = "/config/vendoradmin/deleteReferencedata")
+	public ResponseEntity<Object> deleteReferenceDataByVendor(@RequestHeader("authorization") String authorization,
+			@PathVariable("refId") String refId) throws Exception {		
+		LOG.log(Level.INFO, "Calling API /config/vendoradmin/deleteReferencedata");		
+		
+		AppUser loginUser = new AppUser(authorization);
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
+		return new ResponseEntity<Object>(referenceDataService.deleteReferenceData(loginUser, refId), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/config/vendoradmin/viewreferencedatabygroup/{refGroup}")

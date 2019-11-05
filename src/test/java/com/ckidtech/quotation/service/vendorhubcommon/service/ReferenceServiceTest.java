@@ -197,57 +197,29 @@ public class ReferenceServiceTest {
 	@Test
 	public void deleteReferenceDataSucessfulTest() {
 		
+		AppUser userVendorAdmin = appUserRepository.findById(VENDOR_ADMIN_ID).orElse(null);
+		
 		createReferenceDataSuccefulTest();
 		
-		List<Vendor> vendors = vendorService.viewAllVendors();		
 		List<ReferenceData> listRef = referenceDataService.viewAllReferenceData();
 		
 		List<ReferenceData> allReferenceData = referenceDataService.viewAllReferenceData();
 		assertEquals(1, allReferenceData.size());
 		
-		referenceDataService.deleteReferenceData(vendors.get(0).getId(), listRef.get(0).getId());
+		referenceDataService.deleteReferenceData(userVendorAdmin, listRef.get(0).getId());
 		
 		allReferenceData = referenceDataService.viewAllReferenceData();
 		assertEquals(0, allReferenceData.size());
 		
 	}
-	
-	/*  Need to finalize the logic
-	@Test
-	public void deleteReferenceDataWithReferenceByProductTest() {
 		
-		createReferenceDataSuccefulTest();
-		
-		List<ReferenceData> allReferenceData = referenceDataService.viewAllReferenceData();
-		assertEquals(1, allReferenceData.size());
-		
-		AppUser userVendorAdmin = appUserService.getAppUserById("USER_VENDOR_ADMIN");
-		
-		//QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor(TEST_VENDOR, "Test Vendor", "Address", "9999999", "imgLocation"));
-		//System.out.println(response.getMessages().get(0).getMessage());
-		//assertTrue("Vendor record created.", response.getMessages().contains(new ReturnMessage("Vendor record created.", ReturnMessage.MessageTypeEnum.INFO)));
-				
-		//response = vendorService.activateVendor(ADMIN_USER, TEST_VENDOR);
-		//System.out.println(response.getMessages().get(0).getMessage());
-		//assertEquals(true, response.getVendor().isActiveIndicator());
-		
-		QuotationResponse response = productService.addVendorProduct(userVendorAdmin, new Product(userVendorAdmin.getVendor(), "Food", "Ice Tea", ""));
-		//System.out.println(response.getMessages().get(0).getMessage());
-		assertTrue("Vendor product record created.", response.getMessages().contains(new ReturnMessage("Vendor product record created.", ReturnMessage.MessageTypeEnum.INFO)));		
-		
-		response = referenceDataService.deleteReferenceData(TEST_VENDOR, TEST_VENDOR + ":ProductGroup:Food");
-		assertTrue("Reference data is referenced by Product. Kindly delete those referencing object first before proceeding.", 
-				response.getMessages().contains(new ReturnMessage("Reference data is referenced by Product. Kindly delete those referencing object first before proceeding.", ReturnMessage.MessageTypeEnum.ERROR)));
-			
-	}
-	*/
-	
 	@Test
 	public void deleteReferenceDataMissingMandatoryTest() {
 		
-		QuotationResponse response = referenceDataService.deleteReferenceData("", "");
-		assertEquals(2, response.getMessages().size());
-		assertTrue("Vendor ID is required.", response.getMessages().contains(new ReturnMessage("Vendor ID is required.", ReturnMessage.MessageTypeEnum.ERROR)));
+		AppUser userVendorAdmin = appUserRepository.findById(VENDOR_ADMIN_ID).orElse(null);
+		
+		QuotationResponse response = referenceDataService.deleteReferenceData(userVendorAdmin, "");
+		assertEquals(1, response.getMessages().size());
 		assertTrue("ID is required.", response.getMessages().contains(new ReturnMessage("ID is required.", ReturnMessage.MessageTypeEnum.ERROR)));
 		
 	}
