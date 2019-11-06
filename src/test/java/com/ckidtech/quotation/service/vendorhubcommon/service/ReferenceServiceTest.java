@@ -100,7 +100,7 @@ public class ReferenceServiceTest {
 		assertEquals(true, userVendorAdmin.isActiveIndicator());
 	
 		response = referenceDataService.createReferenceData(userVendorAdmin, 
-				new ReferenceData(TEST_VENDOR.getId(), "ProductGroup", "Food", true));
+				new ReferenceData(TEST_VENDOR.getId(), "ProductGroup", "Food", "Food", true));
 		
 		assertTrue("Reference data record created.", response.getMessages().contains(new ReturnMessage("Reference data record created.", ReturnMessage.MessageTypeEnum.INFO)));
 		
@@ -109,6 +109,7 @@ public class ReferenceServiceTest {
 		assertNotEquals(null, refData.getId());
 		assertEquals(TEST_VENDOR_ID, refData.getGrantTo());
 		assertEquals("ProductGroup", refData.getRefGroup());
+		assertEquals("Food", refData.getName());
 		assertEquals("Food", refData.getValue());
 		assertEquals(true, refData.getDefaultFlag());
 		
@@ -121,7 +122,7 @@ public class ReferenceServiceTest {
 		AppUser userVendorAdmin = appUserRepository.findById(VENDOR_ADMIN_ID).orElse(null);
 		
 		QuotationResponse response = referenceDataService.createReferenceData(userVendorAdmin, 
-				new ReferenceData("", "", "", true));
+				new ReferenceData("", "", "", "", true));
 		
 		assertTrue("Grant To is required.", response.getMessages().contains(new ReturnMessage("Grant To is required.", ReturnMessage.MessageTypeEnum.ERROR)));
 		assertTrue("Reference Group is required.", response.getMessages().contains(new ReturnMessage("Reference Group is required.", ReturnMessage.MessageTypeEnum.ERROR)));
@@ -138,7 +139,7 @@ public class ReferenceServiceTest {
 		AppUser userVendorAdmin = appUserRepository.findById(VENDOR_ADMIN_ID).orElse(null);
 		
 		QuotationResponse response = referenceDataService.createReferenceData(userVendorAdmin, 
-				new ReferenceData(vendors.get(0).getId(), "ProductGroup", "Food", true));
+				new ReferenceData(vendors.get(0).getId(), "ProductGroup", "Food", "Food", true));
 		
 		assertTrue("Reference data already exists.", response.getMessages().contains(new ReturnMessage("Reference data already exists.", ReturnMessage.MessageTypeEnum.ERROR)));
 		
@@ -155,13 +156,14 @@ public class ReferenceServiceTest {
 		List<ReferenceData> listRef = referenceDataService.viewAllReferenceData();
 		
 		QuotationResponse response = referenceDataService.updateReferenceData(userVendorAdmin, 
-				new ReferenceData(listRef.get(0).getId(), vendors.get(0).getId(), "ProductGroupNew", "Food New", false));
+				new ReferenceData(listRef.get(0).getId(), vendors.get(0).getId(), "ProductGroupNew", "Food New", "Food New", false));
 		
 		ReferenceData refData = response.getReferenceData();
 		
 		assertEquals(listRef.get(0).getId(), refData.getId());
 		assertEquals(userVendorAdmin.getObjectRef(), refData.getGrantTo());
 		assertEquals("ProductGroupNew", refData.getRefGroup());
+		assertEquals("Food New", refData.getName());
 		assertEquals("Food New", refData.getValue());
 		assertEquals(false, refData.getDefaultFlag());
 		
@@ -189,7 +191,7 @@ public class ReferenceServiceTest {
 		AppUser userVendorAdmin = appUserRepository.findById(VENDOR_ADMIN_ID).orElse(null);
 		
 		QuotationResponse response = referenceDataService.updateReferenceData(userVendorAdmin, 
-				new ReferenceData("TESTREF", userVendorAdmin.getObjectRef(), "ProductGroupNew", "Food New", false));
+				new ReferenceData("TESTREF", userVendorAdmin.getObjectRef(), "ProductGroupNew", "Food New", "Food New", false));
 		
 		assertTrue("Reference data not found.", response.getMessages().contains(new ReturnMessage("Reference data not found.", ReturnMessage.MessageTypeEnum.ERROR)));
 	}

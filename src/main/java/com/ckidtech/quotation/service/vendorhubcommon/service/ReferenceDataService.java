@@ -84,6 +84,8 @@ public class ReferenceDataService {
 			quotation.addMessage(msgController.createMsg("error.MFE", "Grant To"));
 		if (refData.getRefGroup() == null || "".equals(refData.getRefGroup()))
 			quotation.addMessage(msgController.createMsg("error.MFE", "Reference Group"));
+		if (refData.getName() == null || "".equals(refData.getName()))
+			quotation.addMessage(msgController.createMsg("error.MFE", "Name"));
 		if (refData.getValue() == null || "".equals(refData.getValue()))
 			quotation.addMessage(msgController.createMsg("error.MFE", "Value"));
 		
