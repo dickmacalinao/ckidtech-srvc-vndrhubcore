@@ -3,7 +3,9 @@ package com.ckidtech.quotation.service.vendorhubcommon.controller;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -128,6 +130,23 @@ public class VendorHubCommonControllerConfig {
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(referenceDataService.deleteReferenceData(loginUser, refId), HttpStatus.OK);		
+	}
+	
+	@RequestMapping(value = "/config/vendoradmin/viewreferencedatabyvendor")
+	public ResponseEntity<Object> viewReferenceDataByVendor(@RequestHeader("authorization") String authorization) throws Exception {		
+		LOG.log(Level.INFO, "Calling API /config/vendoradmin/viewreferencedatabyvendor");
+
+		AppUser loginUser = new AppUser(authorization);
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
+		String[] refGroupNames = {"Product Group", "Discount"};
+		
+		Map<String, List<ReferenceData>> refGroups = new HashMap<String, List<ReferenceData>>();
+		
+		for (String refGroupName : refGroupNames) {
+			refGroups.put(refGroupName, referenceDataService.viewReferenceDataByRoleAndRefGroup(loginUser.getObjectRef(), refGroupName));			
+		}
+				
+		return new ResponseEntity<Object>(refGroups, HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/config/vendoradmin/viewreferencedatabygroup/{refGroup}")
