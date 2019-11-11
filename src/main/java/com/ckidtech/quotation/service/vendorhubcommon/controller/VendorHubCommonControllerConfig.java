@@ -3,9 +3,7 @@ package com.ckidtech.quotation.service.vendorhubcommon.controller;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,6 +24,7 @@ import com.ckidtech.quotation.service.core.controller.QuotationResponse;
 import com.ckidtech.quotation.service.core.model.AppUser;
 import com.ckidtech.quotation.service.core.model.Connection;
 import com.ckidtech.quotation.service.core.model.ReferenceData;
+import com.ckidtech.quotation.service.core.model.ReferenceGroup;
 import com.ckidtech.quotation.service.core.security.UserRole;
 import com.ckidtech.quotation.service.core.utils.Util;
 import com.ckidtech.quotation.service.vendorhubcommon.service.ReferenceDataService;
@@ -122,7 +121,7 @@ public class VendorHubCommonControllerConfig {
 		return new ResponseEntity<Object>(referenceDataService.updateReferenceData(loginUser, refData), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/config/vendoradmin/deleteReferencedata")
+	@RequestMapping(value = "/config/vendoradmin/deleteReferencedata/{refId}", method = RequestMethod.DELETE)
 	public ResponseEntity<Object> deleteReferenceDataByVendor(@RequestHeader("authorization") String authorization,
 			@PathVariable("refId") String refId) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /config/vendoradmin/deleteReferencedata");		
@@ -138,12 +137,31 @@ public class VendorHubCommonControllerConfig {
 
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
+		
+		
+		List<ReferenceGroup> refGroups = new ArrayList<ReferenceGroup>();
+		ReferenceGroup refGroup;
+		
 		String[] refGroupNames = {"Product Group", "Discount"};
+		int index = 0;
+		List<ReferenceData> data;
 		
-		Map<String, List<ReferenceData>> refGroups = new HashMap<String, List<ReferenceData>>();
+		//Map<String, List<ReferenceData>> refGroups = new HashMap<String, List<ReferenceData>>();
 		
+		LOG.log(Level.INFO, loginUser.toString());
 		for (String refGroupName : refGroupNames) {
-			refGroups.put(refGroupName, referenceDataService.viewReferenceDataByRoleAndRefGroup(loginUser.getObjectRef(), refGroupName));			
+			refGroup = new ReferenceGroup();
+			refGroup.setTitle(refGroupName);			
+			refGroup.setKey(refGroupName + index);
+			data = referenceDataService.viewReferenceDataByRoleAndRefGroup(loginUser.getObjectRef(), refGroupName.replace(" ", ""));
+			LOG.log(Level.INFO, refGroupName);
+			if ( data.size()>0 ) {
+				refGroup.setData(data);
+				refGroups.add(refGroup);
+				index++;
+				LOG.log(Level.INFO, data.toString());
+			}		
+			
 		}
 				
 		return new ResponseEntity<Object>(refGroups, HttpStatus.OK);		

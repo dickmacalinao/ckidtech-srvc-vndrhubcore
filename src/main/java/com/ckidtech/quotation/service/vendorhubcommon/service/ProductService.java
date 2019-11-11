@@ -22,6 +22,7 @@ import com.ckidtech.quotation.service.core.exception.ServiceAccessResourceFailur
 import com.ckidtech.quotation.service.core.model.AppUser;
 import com.ckidtech.quotation.service.core.model.Product;
 import com.ckidtech.quotation.service.core.model.ProductGroup;
+import com.ckidtech.quotation.service.core.model.ObjectGroup;
 import com.ckidtech.quotation.service.core.model.ReferenceData;
 import com.ckidtech.quotation.service.core.model.Vendor;
 import com.ckidtech.quotation.service.core.security.UserRole;
@@ -45,6 +46,11 @@ public class ProductService {
 		
 	@Autowired
 	private MessageController msgController;
+	
+	public Product getObjectById(String id) {
+		LOG.log(Level.INFO, "Calling Product Service getAppUserById()");
+		return productRepository.findById(id).orElse(null);
+	}
 	
 	public QuotationResponse listProducts(AppUser loginUser, boolean flag) {	
 		
@@ -87,8 +93,9 @@ public class ProductService {
 			if ( products.size()>0 ) {
 				prodGroup.setData(products);
 				prodGroups.add(prodGroup);
+				index++;
 			}			
-			index++;
+			
 		}
 		
 		quotation.setProdGroups(prodGroups);
@@ -241,17 +248,24 @@ public class ProductService {
 				}
 				
 				if( quotation.getMessages().isEmpty() ) {
-					productRep.setName(product.getName());
-					productRep.setGroup(product.getGroup());
-					productRep.setVendorCode(loginUser.getObjectRef());
-					productRep.setImgLocation(product.getImgLocation());
-					productRep.setProdComp(product.getProdComp());
 					
-					Util.initalizeUpdatedInfo(productRep, loginUser.getUsername(), msgController.getMsg("info.VPRU"));
-					productRepository.save(productRep);
-					quotation.addMessage(msgController.createMsg("info.VPRU"));
-					quotation.setProduct(productRep);
-					quotation.setProcessSuccessful(true);
+					String changes = productRep.getDifferences(product);
+					if ( "No change.".equalsIgnoreCase(changes) ) {
+						quotation.addMessage(msgController.createMsg("warning.NCD"));
+					} else {
+						productRep.setName(product.getName());
+						productRep.setGroup(product.getGroup());
+						productRep.setVendorCode(loginUser.getObjectRef());
+						productRep.setImgLocation(product.getImgLocation());
+						productRep.setProdComp(product.getProdComp());
+						
+						Util.initalizeUpdatedInfo(productRep, loginUser.getUsername(), changes);
+						productRepository.save(productRep);
+						quotation.addMessage(msgController.createMsg("info.VPRU"));
+						quotation.setProduct(productRep);
+						quotation.setProcessSuccessful(true);
+					}
+					
 				}
 										
 			} 	

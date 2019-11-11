@@ -72,7 +72,7 @@ public class VendorServiceTest {
 		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "imagelink"));
 		String id = response.getVendor().getId();
 		
-		Vendor vendor = vendorService.getVendorById(id);
+		Vendor vendor = vendorService.getObjectById(id);
 		assertEquals(id, vendor.getId());
 		assertEquals("Test Vendor", vendor.getName());
 		assertEquals("imagelink", vendor.getImgLocation());
@@ -166,7 +166,7 @@ public class VendorServiceTest {
 		
 		vendorService.activateVendor(ADMIN_USER, vendor.getId());
 		
-		vendor = vendorService.getVendorById(vendor.getId());
+		vendor = vendorService.getObjectById(vendor.getId());
 		assertEquals(true, vendor.isActiveIndicator());
 		
 		
@@ -186,17 +186,17 @@ public class VendorServiceTest {
 		// Successful de-activation
 		QuotationResponse response = vendorService.addVendor(ADMIN_USER, new Vendor("Test Vendor", "imagelink"));
 		
-		Vendor vendor = vendorService.getVendorById(response.getVendor().getId());		
+		Vendor vendor = vendorService.getObjectById(response.getVendor().getId());		
 		assertEquals(false, vendor.isActiveIndicator());
 		
 		vendorService.activateVendor(ADMIN_USER, vendor.getId());
 		
-		vendor = vendorService.getVendorById(vendor.getId());
+		vendor = vendorService.getObjectById(vendor.getId());
 		assertEquals(true, vendor.isActiveIndicator());
 		
 		vendorService.deActivateVendor(ADMIN_USER, vendor.getId());
 		
-		vendor = vendorService.getVendorById(vendor.getId());
+		vendor = vendorService.getObjectById(vendor.getId());
 		assertEquals(false, vendor.isActiveIndicator());
 		
 		

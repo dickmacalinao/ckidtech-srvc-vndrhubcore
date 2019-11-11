@@ -70,7 +70,7 @@ public class VendorService {
 		return vendorRepository.findByActiveIndicatorAndName(true, "", pageable);
 	}
 
-	public Vendor getVendorById(String id) {
+	public Vendor getObjectById(String id) {
 		LOG.log(Level.INFO, "Calling Vendor Service getVendorById()");
 		return vendorRepository.findById(id).orElse(null);
 	}
@@ -142,18 +142,25 @@ public class VendorService {
 				quotation.addMessage(msgController.createMsg("error.VNFE"));
 			} else {
 
-				Util.initalizeUpdatedInfo(vendorRep, appUser.getUsername(), vendorRep.getDifferences(vendor));				
-				vendorRep.setActiveIndicator(vendor.isActiveIndicator());
-				vendorRep.setName(vendor.getName());
-				vendorRep.setImgLocation(vendor.getImgLocation());
-				vendorRep.setMaxSearchResult(vendor.getMaxSearchResult());
-				vendorRep.setMaxUserAllowed(vendor.getMaxUserAllowed());
-				vendorRep.setMaxProductAllowed(vendor.getMaxProductAllowed());
+				String changes = vendorRep.getDifferences(vendor);
+				if ( "No change.".equalsIgnoreCase(changes) ) {
+					quotation.addMessage(msgController.createMsg("warning.NCD"));
+				} else {
+					Util.initalizeUpdatedInfo(vendorRep, appUser.getUsername(), vendorRep.getDifferences(vendor));				
+					vendorRep.setActiveIndicator(vendor.isActiveIndicator());
+					vendorRep.setName(vendor.getName());
+					vendorRep.setImgLocation(vendor.getImgLocation());
+					vendorRep.setMaxSearchResult(vendor.getMaxSearchResult());
+					vendorRep.setMaxUserAllowed(vendor.getMaxUserAllowed());
+					vendorRep.setMaxProductAllowed(vendor.getMaxProductAllowed());
 
-				vendorRepository.save(vendorRep);
-				quotation.addMessage(msgController.createMsg("info.VRU"));
-				quotation.setVendor(vendorRep);
-				quotation.setProcessSuccessful(true);
+					vendorRepository.save(vendorRep);
+					quotation.addMessage(msgController.createMsg("info.VRU"));
+					quotation.setVendor(vendorRep);
+					quotation.setProcessSuccessful(true);
+				}
+				
+
 			}
 
 		}

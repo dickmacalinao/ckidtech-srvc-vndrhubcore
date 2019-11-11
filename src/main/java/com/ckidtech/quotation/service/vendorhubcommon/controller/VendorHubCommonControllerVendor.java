@@ -61,7 +61,7 @@ public class VendorHubCommonControllerVendor {
 			@PathVariable("id") String id) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /vendor/appadmin/getvendorbyid");
 		Util.checkAccessGrant(new AppUser(authorization), UserRole.APP_ADMIN, null);
-		return new ResponseEntity<Object>(vendorService.getVendorById(id), HttpStatus.OK);		
+		return new ResponseEntity<Object>(vendorService.getObjectById(id), HttpStatus.OK);		
 	}
 		
 	@RequestMapping(value = "/vendor/appadmin/createvendor", method = RequestMethod.POST)
@@ -109,7 +109,7 @@ public class VendorHubCommonControllerVendor {
 		return new ResponseEntity<Object>(vendorService.activateVendor(loginUser, vendorCode), HttpStatus.OK);		
 	}
 	
-	@RequestMapping(value = "/vendor/admin/deactivatevendor/{vendorCode}")
+	@RequestMapping(value = "/vendor/appadmin/deactivatevendor/{vendorCode}")
 	public ResponseEntity<Object> deActivateVendor(@RequestHeader("authorization") String authorization, 
 			@PathVariable("vendorCode") String vendorCode) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /vendor/admin/deactivateevendor:" + vendorCode + ")");
@@ -138,7 +138,7 @@ public class VendorHubCommonControllerVendor {
 		
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
-		return new ResponseEntity<Object>(vendorService.getVendorById(loginUser.getObjectRef()), HttpStatus.OK);		
+		return new ResponseEntity<Object>(vendorService.getObjectById(loginUser.getObjectRef()), HttpStatus.OK);		
 	}
 	
 	@RequestMapping(value = "/vendor/vendoradmin/updatevendor", method = RequestMethod.POST)

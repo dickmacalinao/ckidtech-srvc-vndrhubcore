@@ -133,12 +133,21 @@ public class VendorHubCommonControllerProduct {
 	}
 		
 	@RequestMapping(value = "/product/vendoradmin/deletevendorproduct/{productId}")
-	public ResponseEntity<Object> deleteVendorProduct(@RequestHeader("authorization") String authorization,
+	public ResponseEntity<Object> getVendorProductById(@RequestHeader("authorization") String authorization,
 			@PathVariable("productId") String productId) throws Exception {		
 		LOG.log(Level.INFO, "Calling API /product/vendoradmin/deletevendorproduct/" + productId);
 		AppUser loginUser = new AppUser(authorization);
 		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
 		return new ResponseEntity<Object>(productService.deleteVendorProduct(loginUser, productId), HttpStatus.OK);		
+	}
+	
+	@RequestMapping(value = "/product/vendoradmin/getvendorproductbyid/{productId}")
+	public ResponseEntity<Object> deleteVendorProduct(@RequestHeader("authorization") String authorization,
+			@PathVariable("productId") String productId) throws Exception {		
+		LOG.log(Level.INFO, "Calling API /product/vendoradmin/deletevendorproduct/" + productId);
+		AppUser loginUser = new AppUser(authorization);
+		Util.checkAccessGrant(loginUser, UserRole.VENDOR_ADMIN, null);
+		return new ResponseEntity<Object>(productService.getObjectById(productId), HttpStatus.OK);		
 	}
 	
 	// Vendor User services

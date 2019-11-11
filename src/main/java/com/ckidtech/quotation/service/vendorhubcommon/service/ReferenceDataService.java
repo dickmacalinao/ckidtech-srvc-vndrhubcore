@@ -141,6 +141,7 @@ public class ReferenceDataService {
 			} else {
 				refRep.setGrantTo(refData.getGrantTo());
 				refRep.setRefGroup(refData.getRefGroup());
+				refRep.setName(refData.getName());
 				refRep.setValue(refData.getValue());
 				refRep.setActiveIndicator(true);
 				Util.initalizeUpdatedInfo(refRep, loginUser.getUsername(), msgController.getMsg("info.RDRU"));
@@ -189,7 +190,7 @@ public class ReferenceDataService {
 			
 			if ( quotation.getMessages().isEmpty() ) {	
 				referenceDataRepository.delete(refRep);	
-				quotation.addMessage(msgController.createMsg("info.RDRC"));
+				quotation.addMessage(msgController.createMsg("info.RDRD"));
 				quotation.setProcessSuccessful(true);
 			}
 			
