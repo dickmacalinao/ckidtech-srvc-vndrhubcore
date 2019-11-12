@@ -177,10 +177,11 @@ public class ReferenceServiceTest {
 		QuotationResponse response = referenceDataService.updateReferenceData(userVendorAdmin, 
 				new ReferenceData("", "", "", "", true));
 		
-		assertEquals(4, response.getMessages().size());
+		assertEquals(5, response.getMessages().size());
 		assertTrue("Grant To is required.", response.getMessages().contains(new ReturnMessage("Grant To is required.", ReturnMessage.MessageTypeEnum.ERROR)));
 		assertTrue("Reference Group is required.", response.getMessages().contains(new ReturnMessage("Reference Group is required.", ReturnMessage.MessageTypeEnum.ERROR)));
 		assertTrue("ID is required.", response.getMessages().contains(new ReturnMessage("ID is required.", ReturnMessage.MessageTypeEnum.ERROR)));
+		assertTrue("Name is required.", response.getMessages().contains(new ReturnMessage("Name is required.", ReturnMessage.MessageTypeEnum.ERROR)));
 		assertTrue("Value is required.", response.getMessages().contains(new ReturnMessage("Value is required.", ReturnMessage.MessageTypeEnum.ERROR)));
 		
 	}

@@ -92,10 +92,10 @@ public class ReferenceDataService {
 		if (quotation.getMessages().isEmpty()) {
 			
 			Pageable pageable = new PageRequest(0, 100, Sort.Direction.ASC, "grantTo", "value");
-			System.out.println( refData.getGrantTo() + ":" + refData.getRefGroup());
 			List<ReferenceData> listRefData = referenceDataRepository.searchByRoleAndRefGroup(refData.getGrantTo(), refData.getRefGroup(), pageable);			
 			for (ReferenceData data : listRefData) {
-				if ( data.getValue().equalsIgnoreCase(refData.getValue()) ) {
+				if ( data.getRefGroup().equalsIgnoreCase(refData.getRefGroup()) &&
+						data.getName().equalsIgnoreCase(refData.getName()) ) {
 					quotation.addMessage(msgController.createMsg("error.RDAEE"));
 				}
 			}
@@ -129,6 +129,8 @@ public class ReferenceDataService {
 			quotation.addMessage(msgController.createMsg("error.MFE", "Grant To"));
 		if (refData.getRefGroup() == null || "".equals(refData.getRefGroup()))
 			quotation.addMessage(msgController.createMsg("error.MFE", "Reference Group"));
+		if (refData.getName() == null || "".equals(refData.getName()))
+			quotation.addMessage(msgController.createMsg("error.MFE", "Name"));
 		if (refData.getValue() == null || "".equals(refData.getValue()))
 			quotation.addMessage(msgController.createMsg("error.MFE", "Value"));
 		
