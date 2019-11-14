@@ -22,7 +22,6 @@ import com.ckidtech.quotation.service.core.exception.ServiceAccessResourceFailur
 import com.ckidtech.quotation.service.core.model.AppUser;
 import com.ckidtech.quotation.service.core.model.Product;
 import com.ckidtech.quotation.service.core.model.ProductGroup;
-import com.ckidtech.quotation.service.core.model.ObjectGroup;
 import com.ckidtech.quotation.service.core.model.ReferenceData;
 import com.ckidtech.quotation.service.core.model.Vendor;
 import com.ckidtech.quotation.service.core.security.UserRole;
